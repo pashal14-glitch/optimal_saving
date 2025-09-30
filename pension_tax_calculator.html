@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>מחשבון הטבות מס לחיסכון פנסיוני 2025</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-right: 4px solid #667eea;
+        }
+
+        .section-title {
+            font-size: 20px;
+            color: #667eea;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .results {
+            display: none;
+            margin-top: 30px;
+        }
+
+        .result-box {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 2px solid #e0e0e0;
+        }
+
+        .result-box.highlight {
+            background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+            border-color: #667eea;
+        }
+
+        .result-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .result-item {
+            padding: 10px;
+            margin-bottom: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .result-label {
+            font-weight: 600;
+            color: #555;
+        }
+
+        .result-value {
+            font-weight: bold;
+            color: #333;
+            font-size: 18px;
+        }
+
+        .result-value.success {
+            color: #28a745;
+        }
+
+        .result-value.danger {
+            color: #dc3545;
+        }
+
+        .explanation {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+
+        .explanation-title {
+            font-weight: bold;
+            color: #856404;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .explanation-text {
+            color: #856404;
+            line-height: 1.6;
+            font-size: 14px;
+        }
+
+        .icon {
+            display: inline-block;
+            margin-left: 8px;
+        }
+
+        .big-number {
+            font-size: 32px;
+            font-weight: bold;
+            color: #667eea;
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .info-box {
+            background: #e7f3ff;
+            border: 1px solid #2196F3;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .info-box-title {
+            font-weight: bold;
+            color: #1565C0;
+            margin-bottom: 8px;
+        }
+
+        .info-box-text {
+            color: #1565C0;
+            line-height: 1.6;
+            font-size: 14px;
+        }
+
+        .warning-box {
+            background: #fff3e0;
+            border: 1px solid #ff9800;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+
+        .warning-title {
+            font-weight: bold;
+            color: #e65100;
+            margin-bottom: 8px;
+        }
+
+        .warning-text {
+            color: #e65100;
+            line-height: 1.6;
+            font-size: 14px;
+        }
+
+        .step {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-right: 3px solid #667eea;
+        }
+
+        .step-number {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧮 מחשבון הטבות מס לחיסכון פנסיוני</h1>
+            <p>שנת מס 2025 | חישוב מדויק לפי פקודת מס הכנסה</p>
+        </div>
+
+        <div class="content">
+            <div class="info-box">
+                <div class="info-box-title">💡 למה המחשבון הזה?</div>
+                <div class="info-box-text">
+                    מחשבון זה עוזר לך לחשב את ההטבות המקסימליות במס שאת/ה זכאי/ת להן בגין הפקדות עצמאיות לחיסכון פנסיוני. המחשבון מתאים לשכירים עם שכר לא מבוטח (בונוסים, דמי הבראה, נסיעות וכו').
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">📝 הזנת נתונים</div>
+                
+                <div class="input-group">
+                    <label>שכר ברוטו מבוטח (שנתי) ₪</label>
+                    <input type="number" id="shacharMevutach" placeholder="לדוגמה: 700000">
+                </div>
+
+                <div class="input-group">
+                    <label>שכר ברוטו לא מבוטח (שנתי) ₪</label>
+                    <input type="number" id="shacharLoMevutach" placeholder="לדוגמה: 109407">
+                </div>
+
+                <div class="input-group">
+                    <label>מספר חודשי עבודה בשנה</label>
+                    <input type="number" id="months" value="12" min="1" max="12">
+                </div>
+
+                <div class="input-group">
+                    <label>הפקדות קיימות לפנסיה (שנתי) ₪</label>
+                    <input type="number" id="havkadotKayamot" placeholder="לדוגמה: 16522">
+                </div>
+
+                <div class="input-group">
+                    <label>גיל</label>
+                    <input type="number" id="age" placeholder="לדוגמה: 52" min="18" max="120">
+                </div>
+
+                <button class="btn" onclick="calculate()">🔍 חשב הטבות מס</button>
+            </div>
+
+            <div id="results" class="results"></div>
+        </div>
+    </div>
+
+    <script>
+        // ============= תקרות לשנת 2025 - ניתן לעדכן כל שנה =============
+        const TAKROT_2025 = {
+            // סף עמית מוטב שנתי (16% מהשכר הממוצע במשק)
+            amitMutavShanati: 25566.72,
+            
+            // תקרת שכר מבוטח חודשי לזכאות לסעיף 47 (ניכוי)
+            shacharMevutachMaxLeSe47: 24250,
+            
+            // תקרת זיכוי מקסימלית לעמית מוטב
+            zikuiMaxAmitMutav: 11640,
+            
+            // תקרת זיכוי מקסימלית לעמית לא מוטב
+            zikuiMaxLoMutav: 16440,
+            
+            // תקרת ניכוי מקסימלית
+            nikuiMax: 25608,
+            
+            // שיעור זיכוי
+            zikuiRate: 0.35,
+            
+            // שיעור ניכוי רגיל
+            nikuiRateNormal: 0.11,
+            
+            // שיעור ניכוי מעל גיל 50
+            nikuiRateAge50: 0.165,
+            
+            // הכנסה מזכה לסעיף 47
+            haknasaMezakeSe47: 116400
+        };
+
+        function formatNumber(num) {
+            return num.toLocaleString('he-IL', {minimumFractionDigits: 0, maximumFractionDigits: 0});
+        }
+
+        function calculate() {
+            // קריאת ערכים
+            const shacharMevutach = parseFloat(document.getElementById('shacharMevutach').value) || 0;
+            const shacharLoMevutach = parseFloat(document.getElementById('shacharLoMevutach').value) || 0;
+            const months = parseInt(document.getElementById('months').value) || 12;
+            const havkadotKayamot = parseFloat(document.getElementById('havkadotKayamot').value) || 0;
+            const age = parseInt(document.getElementById('age').value) || 0;
+
+            // בדיקת תקינות
+            if (shacharMevutach === 0 && shacharLoMevutach === 0) {
+                alert('נא להזין לפחות סכום אחד של שכר');
+                return;
+            }
+
+            // חישובים
+            const shacharMevutachChodshi = shacharMevutach / months;
+            const amitMutavYachasi = (TAKROT_2025.amitMutavShanati / 12) * months;
+            const isAmitMutav = havkadotKayamot >= amitMutavYachasi;
+            const missingToAmitMutav = Math.max(0, amitMutavYachasi - havkadotKayamot);
+            
+            // בדיקת זכאות לסעיף 47 (ניכוי)
+            const zikaiLeSe47 = shacharMevutachChodshi <= TAKROT_2025.shacharMevutachMaxLeSe47;
+
+            // חישוב זיכוי
+            const maxZikuiTakra = isAmitMutav ? TAKROT_2025.zikuiMaxAmitMutav : TAKROT_2025.zikuiMaxLoMutav;
+            const zikui5Percent = shacharLoMevutach * 0.05;
+            const zikuiFinal = Math.min(zikui5Percent, maxZikuiTakra);
+            const zikuiTaxBenefit = zikuiFinal * TAKROT_2025.zikuiRate;
+
+            // חישוב ניכוי (אם זכאי)
+            let nikuiFinal = 0;
+            let nikuiTaxBenefit47 = 0;
+            let nikuiTaxBenefit35 = 0;
+            
+            if (zikaiLeSe47) {
+                const nikuiRate = age >= 50 ? TAKROT_2025.nikuiRateAge50 : TAKROT_2025.nikuiRateNormal;
+                const nikuiPercent = shacharLoMevutach * nikuiRate;
+                nikuiFinal = Math.min(nikuiPercent, TAKROT_2025.nikuiMax);
+                nikuiTaxBenefit47 = nikuiFinal * 0.47;
+                nikuiTaxBenefit35 = nikuiFinal * 0.35;
+            }
+
+            // הצגת תוצאות
+            displayResults({
+                shacharMevutach,
+                shacharLoMevutach,
+                shacharMevutachChodshi,
+                months,
+                age,
+                havkadotKayamot,
+                isAmitMutav,
+                amitMutavYachasi,
+                missingToAmitMutav,
+                zikaiLeSe47,
+                zikuiFinal,
+                zikuiTaxBenefit,
+                nikuiFinal,
+                nikuiTaxBenefit47,
+                nikuiTaxBenefit35
+            });
+        }
+
+        function displayResults(data) {
+            const resultsDiv = document.getElementById('results');
+            
+            let html = '<div class="result-box highlight">';
+            html += '<div class="result-title">📊 סיכום מצבך</div>';
+            html += `<div class="result-item">
+                <span class="result-label">שכר ברוטו מבוטח (חודשי)</span>
+                <span class="result-value">${formatNumber(data.shacharMevutachChodshi)} ₪</span>
+            </div>`;
+            html += `<div class="result-item">
+                <span class="result-label">שכר לא מבוטח (שנתי)</span>
+                <span class="result-value">${formatNumber(data.shacharLoMevutach)} ₪</span>
+            </div>`;
+            html += `<div class="result-item">
+                <span class="result-label">מספר חודשים</span>
+                <span class="result-value">${data.months}</span>
+            </div>`;
+            html += `<div class="result-item">
+                <span class="result-label">גיל</span>
+                <span class="result-value">${data.age}</span>
+            </div>`;
+            html += '</div>';
+
+            // בדיקת עמית מוטב
+            html += '<div class="result-box">';
+            html += '<div class="result-title">🔍 בדיקה #1: עמית מוטב</div>';
+            html += `<div class="result-item">
+                <span class="result-label">סף עמית מוטב (${data.months} חודשים)</span>
+                <span class="result-value">${formatNumber(data.amitMutavYachasi)} ₪</span>
+            </div>`;
+            html += `<div class="result-item">
+                <span class="result-label">הפקדות קיימות שלך</span>
+                <span class="result-value">${formatNumber(data.havkadotKayamot)} ₪</span>
+            </div>`;
+            
+            if (data.isAmitMutav) {
+                html += `<div class="result-item">
+                    <span class="result-label">סטטוס</span>
+                    <span class="result-value success">✅ עמית מוטב</span>
+                </div>`;
+                html += '<div class="explanation">';
+                html += '<div class="explanation-title">💡 מה זה אומר?</div>';
+                html += '<div class="explanation-text">את/ה עמית/ה מוטב/ת! זה אומר שאת/ה זכאי/ת לתקרות גבוהות יותר של הטבות מס. המשך לקרוא למטה כדי לראות את ההטבות המלאות.</div>';
+                html += '</div>';
+            } else {
+                html += `<div class="result-item">
+                    <span class="result-label">סטטוס</span>
+                    <span class="result-value danger">❌ לא עמית מוטב</span>
+                </div>`;
+                html += `<div class="result-item">
+                    <span class="result-label">חסר להשלמה</span>
+                    <span class="result-value danger">${formatNumber(data.missingToAmitMutav)} ₪</span>
+                </div>`;
+                html += '<div class="warning-box">';
+                html += '<div class="warning-title">⚠️ חשוב!</div>';
+                html += `<div class="warning-text">כדי להפוך לעמית/ה מוטב/ת, עליך להפקיד עוד <strong>${formatNumber(data.missingToAmitMutav)} ₪</strong>. זה יאפשר לך לקבל הטבות מס גבוהות יותר.</div>`;
+                html += '</div>';
+            }
+            html += '</div>';
+
+            // בדיקת זכאות לניכוי
+            html += '<div class="result-box">';
+            html += '<div class="result-title">🔍 בדיקה #2: זכאות לניכוי (סעיף 47)</div>';
+            html += `<div class="result-item">
+                <span class="result-label">שכר מבוטח חודשי שלך</span>
+                <span class="result-value">${formatNumber(data.shacharMevutachChodshi)} ₪</span>
+            </div>`;
+            html += `<div class="result-item">
+                <span class="result-label">תקרת שכר לסעיף 47</span>
+                <span class="result-value">${formatNumber(TAKROT_2025.shacharMevutachMaxLeSe47)} ₪</span>
+            </div>`;
+            
+            if (data.zikaiLeSe47) {
+                html += `<div class="result-item">
+                    <span class="result-label">זכאות לניכוי</span>
+                    <span class="result-value success">✅ כן</span>
+                </div>`;
+                html += '<div class="info-box">';
+                html += '<div class="info-box-title">💡 מה זה אומר?</div>';
+                html += '<div class="info-box-text">את/ה זכאי/ת גם לניכוי וגם לזיכוי! זה אומר שאת/ה יכול/ה לקבל הטבות מס גם על ניכוי (שמפחית את ההכנסה החייבת במס) וגם על זיכוי (הנחה ישירה במס).</div>';
+                html += '</div>';
+            } else {
+                html += `<div class="result-item">
+                    <span class="result-label">זכאות לניכוי</span>
+                    <span class="result-value danger">❌ לא</span>
+                </div>`;
+                html += '<div class="warning-box">';
+                html += '<div class="warning-title">⚠️ שים/י לב</div>';
+                html += `<div class="warning-text">השכר המבוטח שלך עובר את התקרה (${formatNumber(TAKROT_2025.shacharMevutachMaxLeSe47)} ₪), לכן את/ה זכאי/ת <strong>רק לזיכוי</strong> ולא לניכוי. זה נורמלי לבעלי שכר גבוה.</div>`;
+                html += '</div>';
+            }
+            html += '</div>';
+
+            // הטבות זיכוי
+            html += '<div class="result-box highlight">';
+            html += '<div class="result-title">💰 הטבת זיכוי (סעיף 45א)</div>';
+            html += `<div class="result-item">
+                <span class="result-label">5% מהשכר הלא מבוטח</span>
+                <span class="result-value">${formatNumber(data.shacharLoMevutach * 0.05)} ₪</span>
+            </div>`;
+            html += `<div class="result-item">
+                <span class="result-label">תקרה מקסימלית (${data.isAmitMutav ? 'עמית מוטב' : 'לא עמית מוטב'})</span>
+                <span class="result-value">${formatNumber(data.isAmitMutav ? TAKROT_2025.zikuiMaxAmitMutav : TAKROT_2025.zikuiMaxLoMutav)} ₪</span>
+            </div>`;
+            html += `<div class="big-number">הפקדה מקסימלית: ${formatNumber(data.zikuiFinal)} ₪</div>`;
+            html += `<div class="result-item">
+                <span class="result-label">זיכוי במס (35%)</span>
+                <span class="result-value success">${formatNumber(data.zikuiTaxBenefit)} ₪</span>
+            </div>`;
+            
+            html += '<div class="explanation">';
+            html += '<div class="explanation-title">💡 מה זה זיכוי?</div>';
+            html += '<div class="explanation-text">';
+            html += '<strong>זיכוי = הנחה ישירה במס.</strong><br><br>';
+            html += `אם תפקיד/י <strong>${formatNumber(data.zikuiFinal)} ₪</strong> באופן עצמאי לקופת הפנסיה, המס השנתי שלך יפחת ב-<strong>${formatNumber(data.zikuiTaxBenefit)} ₪</strong>.<br><br>`;
+            html += 'לדוגמה: אם את/ה אמור/ה לשלם 100,000 ₪ מס, תשלם/י רק ' + formatNumber(100000 - data.zikuiTaxBenefit) + ' ₪.';
+            html += '</div>';
+            html += '</div>';
+            html += '</div>';
+
+            // הטבות ניכוי (אם זכאי)
+            if (data.zikaiLeSe47 && data.nikuiFinal > 0) {
+                html += '<div class="result-box highlight">';
+                html += '<div class="result-title">💰 הטבת ניכוי (סעיף 47)</div>';
+                
+                const nikuiRate = data.age >= 50 ? TAKROT_2025.nikuiRateAge50 : TAKROT_2025.nikuiRateNormal;
+                html += `<div class="result-item">
+                    <span class="result-label">שיעור ניכוי ${data.age >= 50 ? '(גיל 50+)' : ''}</span>
+                    <span class="result-value">${(nikuiRate * 100)}%</span>
+                </div>`;
+                html += `<div class="result-item">
+                    <span class="result-label">${(nikuiRate * 100)}% מהשכר הלא מבוטח</span>
+                    <span class="result-value">${formatNumber(data.shacharLoMevutach * nikuiRate)} ₪</span>
+                </div>`;
+                html += `<div class="big-number">הפקדה מקסימלית: ${formatNumber(data.nikuiFinal)} ₪</div>`;
+                html += `<div class="result-item">
+                    <span class="result-label">חיסכון במס (מדרגת 47%)</span>
+                    <span class="result-value success">${formatNumber(data.nikuiTaxBenefit47)} ₪</span>
+                </div>`;
+                html += `<div class="result-item">
+                    <span class="result-label">חיסכון במס (מדרגת 35%)</span>
+                    <span class="result-value success">${formatNumber(data.nikuiTaxBenefit35)} ₪</span>
+                </div>`;
+                
+                html += '<div class="explanation">';
+                html += '<div class="explanation-title">💡 מה זה ניכוי?</div>';
+                html += '<div class="explanation-text">';
+                html += '<strong>ניכוי = הורדת ההכנסה החייבת במס.</strong><br><br>';
+                html += `אם תפקיד/י <strong>${formatNumber(data.nikuiFinal)} ₪</strong>, ההכנסה שעליה מחשבים את המס תפחת בסכום הזה.<br><br>`;
+                html += 'החיסכון במס תלוי במדרגת המס שלך:<br>';
+                html += '• אם את/ה במדרגת 47%: חוסך/ת ' + formatNumber(data.nikuiTaxBenefit47) + ' ₪<br>';
+                html += '• אם את/ה במדרגת 35%: חוסך/ת ' + formatNumber(data.nikuiTaxBenefit35) + ' ₪';
+                html += '</div>';
+                html += '</div>';
+                html += '</div>';
+            }
+
+            // סיכום סופי
+            html += '<div class="result-box highlight">';
+            html += '<div class="result-title">🎯 תוכנית פעולה מומלצת</div>';
+            
+            let stepNum = 1;
+            
+            if (!data.isAmitMutav) {
+                html += `<div class="step">
+                    <span class="step-number">${stepNum++}</span>
+                    <strong>הפוך/י לעמית/ה מוטב/ת:</strong><br>
+                    הפקד/י <strong>${formatNumber(data.missingToAmitMutav)} ₪</strong> כדי להגיע לסף עמית מוטב.
+                </div>`;
+            }
+            
+            html += `<div class="step">
+                <span class="step-number">${stepNum++}</span>
+                <strong>הפקד/י באופן עצמאי:</strong><br>
+                הפקד/י עד <strong>${formatNumber(data.zikuiFinal)} ₪</strong> כהפקדה עצמאית (סעיף 45א).
+            </div>`;
+            
+            if (data.zikaiLeSe47 && data.nikuiFinal > 0) {
+                html += `<div class="step">
+                    <span class="step-number">${stepNum++}</span>
+                    <strong>אופציה נוספת:</strong><br>
+                    אם השכר הלא מבוטח גבוה מספיק, ניתן להפקיד גם עד <strong>${formatNumber(data.nikuiFinal)} ₪</strong> לניכוי (סעיף 47).
+                </div>`;
+            }
+            
+            html += `<div class="step">
+                <span class="step-number">${stepNum++}</span>
+                <strong>הגש/י דוח שנתי:</strong><br>
+                בסוף שנת 2025, הגש/י דוח שנתי למס הכנסה כדי לקבל את הזיכוי.
+            </div>`;
+            
+            html += `<div class="step">
+                <span class="step-number">${stepNum++}</span>
+                <strong>קבל/י החזר מס:</strong><br>
+                תקבל/י החזר מס של <strong>${formatNumber(data.zikuiTaxBenefit)} ₪</strong>!
+            </div>`;
+            
+            const totalHafkada = (!data.isAmitMutav ? data.missingToAmitMutav : 0) + data.zikuiFinal;
+            html += `<div class="big-number" style="background: linear-gradient(135deg, #28a74515 0%, #20c99715 100%); color: #28a745;">
+                💰 סה"כ הטבת מס: ${formatNumber(data.zikuiTaxBenefit)} ₪
+            </div>`;
+            
+            html += '</div>';
+
+            // הסברים נוספים
+            html += '<div class="result-box">';
+            html += '<div class="result-title">📚 הסברים חשובים</div>';
+            
+            html += '<div class="explanation" style="background: #e8f5e9; border-color: #4caf50;">';
+            html += '<div class="explanation-title" style="color: #2e7d32;">✅ מה זה שכר לא מבוטח?</div>';
+            html += '<div class="explanation-text" style="color: #2e7d32;">';
+            html += 'שכר לא מבוטח הוא החלק מהשכר שעבורו המעסיק <strong>לא</strong> מפריש לפנסיה, כמו:<br>';
+            html += '• בונוסים ותוספות<br>';
+            html += '• דמי הבראה<br>';
+            html += '• הוצאות נסיעה<br>';
+            html += '• שעות נוספות<br>';
+            html += '• שי לחג<br>';
+            html += 'על הסכומים האלה אפשר להפקיד בעצמך ולקבל הטבות מס!';
+            html += '</div>';
+            html += '</div>';
+
+            html += '<div class="explanation" style="background: #fff3e0; border-color: #ff9800; margin-top: 15px;">';
+            html += '<div class="explanation-title" style="color: #e65100;">⚖️ הבדל בין זיכוי לניכוי</div>';
+            html += '<div class="explanation-text" style="color: #e65100;">';
+            html += '<strong>זיכוי (סעיף 45א):</strong><br>';
+            html += '• הנחה ישירה מהמס<br>';
+            html += '• תמיד 35% מסכום ההפקדה<br>';
+            html += '• לא תלוי במדרגת המס<br><br>';
+            html += '<strong>ניכוי (סעיף 47):</strong><br>';
+            html += '• מפחית את ההכנסה החייבת במס<br>';
+            html += '• החיסכון תלוי במדרגת המס שלך<br>';
+            html += '• רק למי ששכרו המבוטח נמוך מ-' + formatNumber(TAKROT_2025.shacharMevutachMaxLeSe47) + ' ₪ לחודש';
+            html += '</div>';
+            html += '</div>';
+
+            html += '<div class="explanation" style="background: #e3f2fd; border-color: #2196f3; margin-top: 15px;">';
+            html += '<div class="explanation-title" style="color: #0d47a1;">🎓 מה זה עמית מוטב?</div>';
+            html += '<div class="explanation-text" style="color: #0d47a1;">';
+            html += 'עמית מוטב הוא מי שהפקיד לפנסיה לפחות <strong>' + formatNumber(TAKROT_2025.amitMutavShanati) + ' ₪</strong> בשנה (נכון ל-12 חודשים).<br><br>';
+            html += '<strong>היתרונות:</strong><br>';
+            html += '• תקרת זיכוי נמוכה יותר: ' + formatNumber(TAKROT_2025.zikuiMaxAmitMutav) + ' ₪ (במקום ' + formatNumber(TAKROT_2025.zikuiMaxLoMutav) + ' ₪)<br>';
+            html += '• אבל יש לך יותר אפשרויות להפקדה<br>';
+            html += '• הסכום מחושב יחסי למספר חודשי העבודה';
+            html += '</div>';
+            html += '</div>';
+
+            if (data.age >= 50) {
+                html += '<div class="explanation" style="background: #f3e5f5; border-color: #9c27b0; margin-top: 15px;">';
+                html += '<div class="explanation-title" style="color: #6a1b9a;">🎂 הטבה מיוחדת לגיל 50+</div>';
+                html += '<div class="explanation-text" style="color: #6a1b9a;">';
+                html += 'כיוון שאת/ה מעל גיל 50, את/ה זכאי/ת לשיעור ניכוי מוגדל!<br><br>';
+                html += '• עד גיל 50: 11% ניכוי<br>';
+                html += '• מעל גיל 50: <strong>16.5%</strong> ניכוי (תוספת של 50%)<br><br>';
+                html += '⚠️ <strong>אבל שים/י לב:</strong> ההטבה הזו רלוונטית רק אם השכר המבוטח שלך נמוך מ-' + formatNumber(TAKROT_2025.shacharMevutachMaxLeSe47) + ' ₪ לחודש.';
+                html += '</div>';
+                html += '</div>';
+            }
+
+            html += '</div>';
+
+            // אזור עדכון תקרות
+            html += '<div class="result-box" style="background: #f5f5f5; border: 2px dashed #999;">';
+            html += '<div class="result-title" style="color: #666;">⚙️ תקרות שנת 2025 (לעדכון)</div>';
+            html += '<div style="font-size: 13px; color: #666; line-height: 1.8;">';
+            html += '📌 <strong>סף עמית מוטב שנתי:</strong> ' + formatNumber(TAKROT_2025.amitMutavShanati) + ' ₪<br>';
+            html += '📌 <strong>תקרת שכר מבוטח לסעיף 47:</strong> ' + formatNumber(TAKROT_2025.shacharMevutachMaxLeSe47) + ' ₪/חודש<br>';
+            html += '📌 <strong>תקרת זיכוי עמית מוטב:</strong> ' + formatNumber(TAKROT_2025.zikuiMaxAmitMutav) + ' ₪<br>';
+            html += '📌 <strong>תקרת זיכוי לא עמית מוטב:</strong> ' + formatNumber(TAKROT_2025.zikuiMaxLoMutav) + ' ₪<br>';
+            html += '📌 <strong>תקרת ניכוי מקסימלית:</strong> ' + formatNumber(TAKROT_2025.nikuiMax) + ' ₪<br>';
+            html += '📌 <strong>הכנסה מזכה סעיף 47:</strong> ' + formatNumber(TAKROT_2025.haknasaMezakeSe47) + ' ₪<br><br>';
+            html += '<em style="color: #999;">💡 ערכים אלו ניתנים לעדכון בקוד ה-JavaScript (אובייקט TAKROT_2025)</em>';
+            html += '</div>';
+            html += '</div>';
+
+            // הצהרת אחריות
+            html += '<div class="warning-box" style="margin-top: 30px;">';
+            html += '<div class="warning-title">⚠️ הצהרת אחריות</div>';
+            html += '<div class="warning-text">';
+            html += 'מחשבון זה מספק אומדן כללי בלבד ואינו מהווה ייעוץ מס או פנסיוני. התוצאות מבוססות על פקודת מס הכנסה ותקנותיה הידועות לשנת 2025, אך:<br><br>';
+            html += '• התקרות והסכומים עשויים להשתנות במהלך השנה<br>';
+            html += '• מצבים אישיים מיוחדים עשויים להשפיע על החישוב<br>';
+            html += '• מומלץ להתייעץ עם יועץ מס או יועץ פנסיוני מוסמך<br>';
+            html += '• המידע נכון למועד יצירת המחשבון (2025)<br><br>';
+            html += '<strong>אין לראות במידע זה תחליף לייעוץ מקצועי!</strong>';
+            html += '</div>';
+            html += '</div>';
+
+            resultsDiv.innerHTML = html;
+            resultsDiv.style.display = 'block';
+            
+            // גלילה לתוצאות
+            resultsDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        // הוספת פונקציונליות Enter
+        document.addEventListener('DOMContentLoaded', function() {
+            const inputs = document.querySelectorAll('input[type="number"]');
+            inputs.forEach(input => {
+                input.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        calculate();
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
+            
