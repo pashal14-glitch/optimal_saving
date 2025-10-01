@@ -362,7 +362,8 @@
             const shacharMevutachChodshi = shacharMevutach / months;
             const amitMutavYachasi = (TAKROT_2025.amitMutavShanati / 12) * months;
             const isAmitMutav = havkadotKayamot >= amitMutavYachasi;
-            const missingToAmitMutav = Math.max(0, amitMutavYachasi - havkadotKayamot);          // ========== חישוב זיכוי סעיף 45א ==========
+            const missingToAmitMutav = Math.max(0, amitMutavYachasi - havkadotKayamot);     
+// ========== חישוב זיכוי סעיף 45א ==========
 
 // 1. ביטוח חיים
 const bituachChayimShalem = havkadotBituachChayim; // הסכום ששולם
@@ -399,7 +400,7 @@ if (shacharMevutach > 0 && isAmitMutav) {
     zikuiPensiaMevutachet = sumMazke_PensiaMevutachet * 0.35; // 35% זיכוי
 }
 
-// 3. פנסיה - הכנסה לא מבוטחת
+// 3. פנסיה - הכנסה לא מבוטחת (רק לעמית מוטב!)
 let pensiaLoMevutachet = 0;
 let takratPensiaLoMevutachet = 0;
 let sumMazke_PensiaLoMevutachet = 0;
@@ -407,22 +408,23 @@ let zikuiPensiaLoMevutachet = 0;
 
 if (shacharLoMevutach > 0 && isAmitMutav) {
     pensiaLoMevutachet = havkadotPensia; // נניח שכל ההפקדה לפנסיה
-    // תקרה: 5% מההכנסה הלא מבוטחת עד פעמיים הכנסה מזכה (19,400 × 12)
-    const takraMaxLo = (TAKROT_2025.shacharMevutachMaxLeSe47 * 12 * 2) - shacharMevutach;
-    takratPensiaLoMevutachet = Math.min(shacharLoMevutach * 0.05, takraMaxLo);
+    
+    // תקרה: 5% מההכנסה הלא מבוטחת
+    const takra5Percent = shacharLoMevutach * 0.05;
+    
+    // תקרה מקסימלית: פעמיים הכנסה מזכה (9,700 × 2 × 12 = 232,800) 
+    // בניכוי הנמוך מבין הכנסה מזכה (9,700 × 12 = 116,400) או הכנסה מבוטחת
+    const takraMax = TAKROT_2025.hachnasaMezaka * 2 * 12; // 232,800
+    const nikui = Math.min(TAKROT_2025.hachnasaMezaka * 12, shacharMevutach); // הנמוך מבין 116,400 או הכנסה מבוטחת
+    const takratMaksimalit = takraMax - nikui;
+    
+    takratPensiaLoMevutachet = Math.min(takra5Percent, takratMaksimalit);
     sumMazke_PensiaLoMevutachet = Math.min(pensiaLoMevutachet, takratPensiaLoMevutachet);
     zikuiPensiaLoMevutachet = sumMazke_PensiaLoMevutachet * 0.35; // 35% זיכוי
 }
 
 // 4. סה"כ זיכוי
 const totalZikui45a = zikuiBituachChayim + zikuiPensiaMevutachet + zikuiPensiaLoMevutachet;
-
-            // בדיקת תקינות
-            if (shacharMevutach === 0 && shacharLoMevutach === 0) {
-                alert('נא להזין לפחות סכום אחד של שכר');
-                return;
-            }
-            
             // בדיקת זכאות לסעיף 47 (ניכוי)
             const zikaiLeSe47 = shacharMevutachChodshi <= TAKROT_2025.shacharMevutachMaxLeSe47;
 
