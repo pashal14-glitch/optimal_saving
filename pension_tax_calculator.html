@@ -311,6 +311,8 @@
     <script>
         // ============= תקרות לשנת 2025 - ניתן לעדכן כל שנה =============
         const TAKROT_2025 = {
+            //הכנסה מזכה לפי סעיף 47(א)(1)
+            hachnasaMezaka :9700,
             // סף עמית מוטב שנתי (16% מהשכר הממוצע במשק)
             amitMutavShanati: 25566.72,
             
@@ -473,7 +475,9 @@
                 <span class="result-value">${formatNumber(data.shacharMevutachChodshi)} ₪</span>
             </div>`;
             html += `<div class="result-item">
-                <span class="result-label">תקרת שכר לסעיף 47</span>
+                <span class="result-label">הכנסה מזכה לפי סעיף 47 (א)(1)</span>
+                <span class="result-value">${formatNumber(TAKROT_2025. hachnasaMezaka)} ₪</span>
+                <span class="result-label">סכום השווה לשתי פעמים וחצי הסכום האמור בפסקה (1) להגדרה "הכנסה מזכה" לשנה -תקרת שכר לסעיף 47</span>
                 <span class="result-value">${formatNumber(TAKROT_2025.shacharMevutachMaxLeSe47)} ₪</span>
             </div>`;
             
@@ -643,7 +647,7 @@
             html += '<div class="explanation" style="background: #e3f2fd; border-color: #2196f3; margin-top: 15px;">';
             html += '<div class="explanation-title" style="color: #0d47a1;">🎓 מה זה עמית מוטב?</div>';
             html += '<div class="explanation-text" style="color: #0d47a1;">';
-       html += '<strong>הגדרה לפי סעיף 47(א) לפקודת מס הכנסה:</strong><br>';
+       html += '<strong>הגדרה לפי סעיף 47(א)(7) לפקודת מס הכנסה:</strong><br>';
 html += '"עמית מוטב" – יחיד שהפקיד בשנת המס לפנסיה לפחות ';
 html += '<strong>16% מהשכר הממוצע במשק</strong>.<br><br>';
 
@@ -657,16 +661,6 @@ html += 'לדוגמה:<br>';
 html += '• 12 חודשים → ' + formatNumber(TAKROT_2025.amitMutavShanati) + ' ₪<br>';
 html += '• 9 חודשים → ' + formatNumber((TAKROT_2025.amitMutavShanati / 12) * 9) + ' ₪<br>';
 html += '• 6 חודשים → ' + formatNumber((TAKROT_2025.amitMutavShanati / 12) * 6) + ' ₪<br><br>';
-
-html += '<strong>📚 מקור חוקי:</strong><br>';
-html += 'סעיף 47(א) לפקודת מס הכנסה - הגדרת "עמית מוטב".<br>';
-html += 'השכר הממוצע מתעדכן מדי שנה ע"י המוסד לביטוח לאומי.';
-            html += '<strong>היתרונות:</strong><br>';
-            html += '• תקרת זיכוי נמוכה יותר: ' + formatNumber(TAKROT_2025.zikuiMaxAmitMutav) + ' ₪ (במקום ' + formatNumber(TAKROT_2025.zikuiMaxLoMutav) + ' ₪)<br>';
-            html += '• אבל יש לך יותר אפשרויות להפקדה<br>';
-            html += '• הסכום מחושב יחסי למספר חודשי העבודה';
-            html += '</div>';
-            html += '</div>';
 
             if (data.age >= 50) {
                 html += '<div class="explanation" style="background: #f3e5f5; border-color: #9c27b0; margin-top: 15px;">';
@@ -686,15 +680,15 @@ html += 'השכר הממוצע מתעדכן מדי שנה ע"י המוסד לב�
             html += '<div class="result-box" style="background: #f5f5f5; border: 2px dashed #999;">';
             html += '<div class="result-title" style="color: #666;">⚙️ תקרות שנת 2025 (לעדכון)</div>';
             html += '<div style="font-size: 13px; color: #666; line-height: 1.8;">';
-         html += '<strong>📌 סף עמית מוטב (סעיף 47א):</strong><br>';
+         html += '<strong>📌 סף עמית מוטב (סעיף ( 47(א)(7)):</strong><br>';
 html += '&nbsp;&nbsp;&nbsp;' + formatNumber(TAKROT_2025.amitMutavShanati) + ' ₪/שנה (16% מהשכר הממוצע במשק)<br>';
 html += '&nbsp;&nbsp;&nbsp;מקור: השכר הממוצע: 13,316 ₪ × 12 × 16%<br><br>';
-            html += '📌 <strong>תקרת שכר מבוטח לסעיף 47:</strong> ' + formatNumber(TAKROT_2025.shacharMevutachMaxLeSe47) + ' ₪/חודש<br>';
+            html += '📌 <strong>תקרת הכנסה מזכה 47(א()1()1 - )רק מהכנסת עבודה:</strong> ' + formatNumber(TAKROT_2025.shacharMevutachMaxLeSe47) + ' ₪/חודש<br>';
             html += '📌 <strong>תקרת זיכוי עמית מוטב:</strong> ' + formatNumber(TAKROT_2025.zikuiMaxAmitMutav) + ' ₪<br>';
             html += '📌 <strong>תקרת זיכוי לא עמית מוטב:</strong> ' + formatNumber(TAKROT_2025.zikuiMaxLoMutav) + ' ₪<br>';
             html += '📌 <strong>תקרת ניכוי מקסימלית:</strong> ' + formatNumber(TAKROT_2025.nikuiMax) + ' ₪<br>';
             html += '📌 <strong>הכנסה מזכה סעיף 47:</strong> ' + formatNumber(TAKROT_2025.haknasaMezakeSe47) + ' ₪<br><br>';
-            html += '<em style="color: #999;">💡 ערכים אלו ניתנים לעדכון בקוד ה-JavaScript (אובייקט TAKROT_2025)</em>';
+            
             html += '</div>';
             html += '</div>';
 
