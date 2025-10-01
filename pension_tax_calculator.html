@@ -358,7 +358,11 @@
             const havkadotBituachChayim = parseFloat(document.getElementById('bituachChayim').value) || 0;
             const havkadotKayamot = havkadotPensia + havkadotBituachChayim;
             const age = parseInt(document.getElementById('age').value) || 0;
-            // ========== חישוב זיכוי סעיף 45א ==========
+   // חישובים
+            const shacharMevutachChodshi = shacharMevutach / months;
+            const amitMutavYachasi = (TAKROT_2025.amitMutavShanati / 12) * months;
+            const isAmitMutav = havkadotKayamot >= amitMutavYachasi;
+            const missingToAmitMutav = Math.max(0, amitMutavYachasi - havkadotKayamot);          // ========== חישוב זיכוי סעיף 45א ==========
 
 // 1. ביטוח חיים
 const bituachChayimShalem = havkadotBituachChayim; // הסכום ששולם
@@ -418,12 +422,6 @@ const totalZikui45a = zikuiBituachChayim + zikuiPensiaMevutachet + zikuiPensiaLo
                 alert('נא להזין לפחות סכום אחד של שכר');
                 return;
             }
-
-            // חישובים
-            const shacharMevutachChodshi = shacharMevutach / months;
-            const amitMutavYachasi = (TAKROT_2025.amitMutavShanati / 12) * months;
-            const isAmitMutav = havkadotKayamot >= amitMutavYachasi;
-            const missingToAmitMutav = Math.max(0, amitMutavYachasi - havkadotKayamot);
             
             // בדיקת זכאות לסעיף 47 (ניכוי)
             const zikaiLeSe47 = shacharMevutachChodshi <= TAKROT_2025.shacharMevutachMaxLeSe47;
