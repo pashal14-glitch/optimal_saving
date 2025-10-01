@@ -574,7 +574,8 @@ const totalZikui45a = zikuiBituachChayim + zikuiPensiaMevutachet + zikuiPensiaLo
             }
             html += '</div>';
 
-         // הטבות זיכוי סעיף 45א
+  
+// הטבות זיכוי סעיף 45א
 html += '<div class="result-box highlight">';
 html += '<div class="result-title">💰 זיכוי ממס לפי סעיף 45א</div>';
 
@@ -582,15 +583,15 @@ html += '<div class="result-title">💰 זיכוי ממס לפי סעיף 45א</
 html += '<div class="result-title" style="font-size: 16px; margin-top: 15px;">📋 זיכוי בעד ביטוח חיים - סעיף 45א(א)</div>';
 html += `<div class="result-item">
     <span class="result-label">סכום ששולם לביטוח חיים</span>
-    <span class="result-value">${formatNumber(bituachChayimShalem)} ₪</span>
+    <span class="result-value">${formatNumber(data.bituachChayimShalem)} ₪</span>
 </div>`;
 html += `<div class="result-item">
     <span class="result-label">תקרה מקסימלית לזיכוי</span>
-    <span class="result-value">${formatNumber(takratBituachChayim)} ₪</span>
+    <span class="result-value">${formatNumber(data.takratBituachChayim)} ₪</span>
 </div>`;
 html += `<div class="result-item">
     <span class="result-label">סכום המזכה בפועל (הנמוך מבין השניים)</span>
-    <span class="result-value">${formatNumber(sumMazke_BituachChayim)} ₪</span>
+    <span class="result-value">${formatNumber(data.sumMazke_BituachChayim)} ₪</span>
 </div>`;
 html += `<div class="result-item">
     <span class="result-label">שיעור זיכוי</span>
@@ -598,7 +599,7 @@ html += `<div class="result-item">
 </div>`;
 html += `<div class="result-item" style="background: #e8f5e9;">
     <span class="result-label" style="font-weight: bold;">💚 זיכוי ממס - ביטוח חיים</span>
-    <span class="result-value success">${formatNumber(zikuiBituachChayim)} ₪</span>
+    <span class="result-value success">${formatNumber(data.zikuiBituachChayim)} ₪</span>
 </div>`;
 
 // חלק 2: פנסיה - הכנסה מבוטחת
@@ -606,15 +607,15 @@ if (data.shacharMevutach > 0) {
     html += '<div class="result-title" style="font-size: 16px; margin-top: 20px;">📋 זיכוי בעד פנסיה - הכנסה מבוטחת - סעיף 45א(ב) + (ה)(2)(א)</div>';
     html += `<div class="result-item">
         <span class="result-label">סכום ששולם לפנסיה (מההכנסה המבוטחת)</span>
-        <span class="result-value">${formatNumber(pensiaMevutachet)} ₪</span>
+        <span class="result-value">${formatNumber(data.pensiaMevutachet)} ₪</span>
     </div>`;
     html += `<div class="result-item">
         <span class="result-label">תקרה (7% מההכנסה המזכה המבוטחת)</span>
-        <span class="result-value">${formatNumber(takratPensiaMevutachet)} ₪</span>
+        <span class="result-value">${formatNumber(data.takratPensiaMevutachet)} ₪</span>
     </div>`;
     html += `<div class="result-item">
         <span class="result-label">סכום המזכה בפועל</span>
-        <span class="result-value">${formatNumber(sumMazke_PensiaMevutachet)} ₪</span>
+        <span class="result-value">${formatNumber(data.sumMazke_PensiaMevutachet)} ₪</span>
     </div>`;
     html += `<div class="result-item">
         <span class="result-label">שיעור זיכוי</span>
@@ -622,7 +623,7 @@ if (data.shacharMevutach > 0) {
     </div>`;
     html += `<div class="result-item" style="background: #e8f5e9;">
         <span class="result-label" style="font-weight: bold;">💚 זיכוי ממס - פנסיה מהכנסה מבוטחת</span>
-        <span class="result-value success">${formatNumber(zikuiPensiaMevutachet)} ₪</span>
+        <span class="result-value success">${formatNumber(data.zikuiPensiaMevutachet)} ₪</span>
     </div>`;
 }
 
@@ -631,15 +632,15 @@ if (data.shacharLoMevutach > 0) {
     html += '<div class="result-title" style="font-size: 16px; margin-top: 20px;">📋 זיכוי בעד פנסיה - הכנסה לא מבוטחת - סעיף 45א(ב) + (ה)(2)(ב)</div>';
     html += `<div class="result-item">
         <span class="result-label">סכום ששולם לפנסיה (מההכנסה הלא מבוטחת)</span>
-        <span class="result-value">${formatNumber(pensiaLoMevutachet)} ₪</span>
+        <span class="result-value">${formatNumber(data.pensiaLoMevutachet)} ₪</span>
     </div>`;
     html += `<div class="result-item">
         <span class="result-label">תקרה (5% מההכנסה החייבת הלא מבוטחת)</span>
-        <span class="result-value">${formatNumber(takratPensiaLoMevutachet)} ₪</span>
+        <span class="result-value">${formatNumber(data.takratPensiaLoMevutachet)} ₪</span>
     </div>`;
     html += `<div class="result-item">
         <span class="result-label">סכום המזכה בפועל</span>
-        <span class="result-value">${formatNumber(sumMazke_PensiaLoMevutachet)} ₪</span>
+        <span class="result-value">${formatNumber(data.sumMazke_PensiaLoMevutachet)} ₪</span>
     </div>`;
     html += `<div class="result-item">
         <span class="result-label">שיעור זיכוי</span>
@@ -647,13 +648,13 @@ if (data.shacharLoMevutach > 0) {
     </div>`;
     html += `<div class="result-item" style="background: #e8f5e9;">
         <span class="result-label" style="font-weight: bold;">💚 זיכוי ממס - פנסיה מהכנסה לא מבוטחת</span>
-        <span class="result-value success">${formatNumber(zikuiPensiaLoMevutachet)} ₪</span>
+        <span class="result-value success">${formatNumber(data.zikuiPensiaLoMevutachet)} ₪</span>
     </div>`;
 }
 
 // סיכום כולל
 html += `<div class="big-number" style="background: linear-gradient(135deg, #28a74515 0%, #20c99715 100%); color: #28a745; margin-top: 20px;">
-    ✅ סה"כ זיכוי ממס (סעיף 45א): ${formatNumber(totalZikui45a)} ₪
+    ✅ סה"כ זיכוי ממס (סעיף 45א): ${formatNumber(data.totalZikui45a)} ₪
 </div>`;
 
 html += '</div>';
