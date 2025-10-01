@@ -365,18 +365,15 @@
             const missingToAmitMutav = Math.max(0, amitMutavYachasi - havkadotKayamot);     
 // ========== חישוב זיכוי סעיף 45א ==========
 
-// 1. ביטוח חיים
-const bituachChayimShalem = havkadotBituachChayim; // הסכום ששולם
+// 1. ביטוח חיים - זיכוי על מה שכבר הפקיד
+const bituachChayimShalem = havkadotBituachChayim;
 
-// חישוב תקרה לביטוח חיים
 let takratBituachChayim;
 if (isAmitMutav) {
-    // עמית מוטב - סעיף 45א(ה)
-    const takraKvua = 2268; // 189 ₪ לחודש × 12
+    const takraKvua = 2268;
     const takra5Percent = (shacharMevutach + shacharLoMevutach) * 0.05;
     takratBituachChayim = Math.max(takraKvua, Math.min(bituachChayimShalem, takra5Percent));
 } else {
-    // לא עמית מוטב - סעיף 45א(ד)
     const takraKvua = 2268;
     const takra5or7Percent = shacharMevutach > 0 ? 
         (shacharMevutach * 0.07) : 
@@ -385,46 +382,59 @@ if (isAmitMutav) {
 }
 
 const sumMazke_BituachChayim = Math.min(bituachChayimShalem, takratBituachChayim);
-const zikuiBituachChayim = sumMazke_BituachChayim * 0.25; // 25% זיכוי
+const zikuiBituachChayim = sumMazke_BituachChayim * 0.25;
 
-// 2. פנסיה - הכנסה מבוטחת
-let pensiaMevutachet = 0;
+// 2. פנסיה מהכנסה מבוטחת - זיכוי על מה שכבר הפקיד
+let pensiaMevutachet = havkadotPensia;
 let takratPensiaMevutachet = 0;
 let sumMazke_PensiaMevutachet = 0;
 let zikuiPensiaMevutachet = 0;
 
-if (shacharMevutach > 0 && isAmitMutav) {
-    pensiaMevutachet = havkadotPensia; // נניח שכל ההפקדה לפנסיה
-    takratPensiaMevutachet = shacharMevutach * 0.07; // 7% מההכנסה המבוטחת
+if (shacharMevutach > 0) {
+    if (isAmitMutav) {
+        takratPensiaMevutachet = shacharMevutach * 0.07; // 7% לעמית מוטב
+    } else {
+        takratPensiaMevutachet = shacharMevutach * 0.05; // 5% לא עמית מוטב
+    }
     sumMazke_PensiaMevutachet = Math.min(pensiaMevutachet, takratPensiaMevutachet);
-    zikuiPensiaMevutachet = sumMazke_PensiaMevutachet * 0.35; // 35% זיכוי
+    zikuiPensiaMevutachet = sumMazke_PensiaMevutachet * 0.35;
 }
 
-// 3. פנסיה - הכנסה לא מבוטחת (רק לעמית מוטב!)
-let pensiaLoMevutachet = 0;
+// 3. הכנסה לא מבוטחת - הפקדה פוטנציאלית
 let takratPensiaLoMevutachet = 0;
-let sumMazke_PensiaLoMevutachet = 0;
-let zikuiPensiaLoMevutachet = 0;
+let zikuiPotencialiLoMevutach = 0;
 
-if (shacharLoMevutach > 0 && isAmitMutav) {
-    pensiaLoMevutachet = havkadotPensia; // נניח שכל ההפקדה לפנסיה
-    
-    // תקרה: 5% מההכנסה הלא מבוטחת
-    const takra5Percent = shacharLoMevutach * 0.05;
-    
-    // תקרה מקסימלית: פעמיים הכנסה מזכה (9,700 × 2 × 12 = 232,800) 
-    // בניכוי הנמוך מבין הכנסה מזכה (9,700 × 12 = 116,400) או הכנסה מבוטחת
-    const takraMax = TAKROT_2025.hachnasaMezaka * 2 * 12; // 232,800
-    const nikui = Math.min(TAKROT_2025.hachnasaMezaka * 12, shacharMevutach); // הנמוך מבין 116,400 או הכנסה מבוטחת
-    const takratMaksimalit = takraMax - nikui;
-    
-    takratPensiaLoMevutachet = Math.min(takra5Percent, takratMaksimalit);
-    sumMazke_PensiaLoMevutachet = Math.min(pensiaLoMevutachet, takratPensiaLoMevutachet);
-    zikuiPensiaLoMevutachet = sumMazke_PensiaLoMevutachet * 0.35; // 35% זיכוי
+if (shacharLoMevutach > 0) {
+    if (isAmitMutav) {
+        // עמית מוטב - חשב תקרה זמינה
+        const takra5Percent = shacharLoMevutach * 0.05;
+        const takraMax = TAKROT_2025.hachnasaMezaka * 2 * 12; // 232,800
+        const nikui = Math.min(TAKROT_2025.hachnasaMezaka * 12, shacharMevutach);
+        const takratMaksimalit = takraMax - nikui;
+        
+        takratPensiaLoMevutachet = Math.min(takra5Percent, takratMaksimalit);
+        zikuiPotencialiLoMevutach = takratPensiaLoMevutachet * 0.35;
+    } else {
+        // לא עמית מוטב - חשב כמה חסר + תקרה אם יהפוך
+        takratPensiaLoMevutachet = missingToAmitMutav; // כמה חסר להפוך לעמית מוטב
+        
+        // אם יהפוך לעמית מוטב, יוכל להפקיד:
+        const takra5Percent = shacharLoMevutach * 0.05;
+        const takraMax = TAKROT_2025.hachnasaMezaka * 2 * 12;
+        const nikui = Math.min(TAKROT_2025.hachnasaMezaka * 12, shacharMevutach);
+        const takratMaksimalit = takraMax - nikui;
+        
+        const takratLacharAmitMutav = Math.min(takra5Percent, takratMaksimalit);
+        zikuiPotencialiLoMevutach = (missingToAmitMutav + takratLacharAmitMutav) * 0.35;
+    }
 }
 
-// 4. סה"כ זיכוי
-const totalZikui45a = zikuiBituachChayim + zikuiPensiaMevutachet + zikuiPensiaLoMevutachet;
+// 4. סה"כ זיכוי על מה שכבר הפקיד
+const totalZikui45a = zikuiBituachChayim + zikuiPensiaMevutachet;
+
+// 5. זיכוי פוטנציאלי נוסף
+const zikuiPotenciali = zikuiPotencialiLoMevutach;
+            
             // בדיקת זכאות לסעיף 47 (ניכוי)
             const zikaiLeSe47 = shacharMevutachChodshi <= TAKROT_2025.shacharMevutachMaxLeSe47;
 
