@@ -293,7 +293,7 @@
 
                 <div class="input-group">
                     <label>הפקדות קיימות לפנסיה (שנתי) ₪</label>
-                    <input type="number" id="havkadotKayamot" placeholder="לדוגמה: 16122">
+                    <input type="number" id="havkadotPensia" placeholder="לדוגמה: 16122">
                 </div>
                 <div class="input-group">
                     <label>הפקדות קיימות לביטוח חיים (שנתי) ₪</label>
@@ -315,6 +315,10 @@
     <script>
         // ============= תקרות לשנת 2025 - ניתן לעדכן כל שנה =============
         const TAKROT_2025 = {
+            //תקרת הסכום לזיכוי בעד דמי ביטוח  ותגגמולים 45 א (ד)
+            tikraLeZukui1 :189,
+            // תקרת הסכום לזיכוי בעד דמי ביטוח ותגמולים 45 א (ה) (2)
+            tikraLeZukui1 :19400,
             //הכנסה מזכה לפי סעיף 47(א)(1)
             hachnasaMezaka :9700,
             // סף עמית מוטב שנתי (16% מהשכר הממוצע במשק)
@@ -354,48 +358,31 @@
             const shacharMevutach = parseFloat(document.getElementById('shacharMevutach').value) || 0;
             const shacharLoMevutach = parseFloat(document.getElementById('shacharLoMevutach').value) || 0;
             const months = parseInt(document.getElementById('months').value) || 12;
-            const havkadotPensia = parseFloat(document.getElementById('havkadotKayamot').value) || 0;
+            const havkadotPensia = parseFloat(document.getElementById('havkadotPensia').value) || 0;
             const havkadotBituachChayim = parseFloat(document.getElementById('bituachChayim').value) || 0;
-            const havkadotKayamot = havkadotPensia + havkadotBituachChayim;
+           // const havkadotKayamot = havkadotPensia + havkadotBituachChayim;
             const age = parseInt(document.getElementById('age').value) || 0;
+             
    // חישובים
             const shacharMevutachChodshi = shacharMevutach / months;
             const amitMutavYachasi = (TAKROT_2025.amitMutavShanati / 12) * months;
-            const isAmitMutav = havkadotKayamot >= amitMutavYachasi;
-            const missingToAmitMutav = Math.max(0, amitMutavYachasi - havkadotKayamot);     
+            const isAmitMutav = havkadotPensia >= amitMutavYachasi;
+            const missingToAmitMutav = Math.max(0, amitMutavYachasi - havkadotPensia);
+            const hachnasaMezaka=TAKROT_2025.hachnasaMezaka;
 // ========== חישוב זיכוי סעיף 45א ==========
 
 // 1. ביטוח חיים - זיכוי על מה שכבר הפקיד
 const bituachChayimShalem = havkadotBituachChayim;
-
-let takratBituachChayim;
-if (isAmitMutav) {
-    const takraKvua = 2268;
-    const takra5Percent = (shacharMevutach + shacharLoMevutach) * 0.05;
-    takratBituachChayim = Math.max(takraKvua, Math.min(bituachChayimShalem, takra5Percent));
-} else {
-    const takraKvua = 2268;
-    const takra5or7Percent = shacharMevutach > 0 ? 
-        (shacharMevutach * 0.07) : 
-        ((shacharMevutach + shacharLoMevutach) * 0.05);
-    takratBituachChayim = Math.max(takraKvua, Math.min(bituachChayimShalem, takra5or7Percent));
-}
-
-const sumMazke_BituachChayim = Math.min(bituachChayimShalem, takratBituachChayim);
-const zikuiBituachChayim = sumMazke_BituachChayim * 0.25;
+const zikuiBituachChayim = havkadotBituachChayim * 0.25;
 
 // 2. פנסיה מהכנסה מבוטחת - זיכוי על מה שכבר הפקיד
-let pensiaMevutachet = havkadotPensia;
+let pensiaMevutachet = shacharMevutach;
 let takratPensiaMevutachet = 0;
 let sumMazke_PensiaMevutachet = 0;
 let zikuiPensiaMevutachet = 0;
 
 if (shacharMevutach > 0) {
-    if (isAmitMutav) {
-        takratPensiaMevutachet = shacharMevutach * 0.07; // 7% לעמית מוטב
-    } else {
-        takratPensiaMevutachet = shacharMevutach * 0.05; // 5% לא עמית מוטב
-    }
+    takratPensiaMevutachet =    hachnasaMezaka * 0.07; 
     sumMazke_PensiaMevutachet = Math.min(pensiaMevutachet, takratPensiaMevutachet);
     zikuiPensiaMevutachet = sumMazke_PensiaMevutachet * 0.35;
 }
@@ -462,7 +449,6 @@ displayResults({
     shacharMevutachChodshi,
     months,
     age,
-    havkadotKayamot,
     havkadotPensia,
     havkadotBituachChayim,
     isAmitMutav,
@@ -521,7 +507,7 @@ displayResults({
             </div>`;
             html += `<div class="result-item">
                 <span class="result-label">הפקדות קיימות שלך</span>
-                <span class="result-value">${formatNumber(data.havkadotKayamot)} ₪</span>
+                <span class="result-value">${formatNumber(data.havkadotPensia)} ₪</span>
             </div>`;
             
             if (data.isAmitMutav) {
@@ -548,44 +534,7 @@ displayResults({
                 html += '</div>';
             }
             html += '</div>';
-
-            // בדיקת זכאות לניכוי
-            html += '<div class="result-box">';
-            html += '<div class="result-title">🔍 בדיקה #2: זכאות לניכוי (סעיף 47)</div>';
-            html += `<div class="result-item">
-                <span class="result-label">שכר מבוטח חודשי שלך</span>
-                <span class="result-value">${formatNumber(data.shacharMevutachChodshi)} ₪</span>
-            </div>`;
-            html += `<div class="result-item">
-                <span class="result-label">הכנסה מזכה לפי סעיף 47 (א)(1)</span>
-                <span class="result-value">${formatNumber(TAKROT_2025. hachnasaMezaka)} ₪</span>
-                <span class="result-label">סכום השווה לשתי פעמים וחצי הסכום האמור בפסקה (1) להגדרה "הכנסה מזכה" לשנה -תקרת שכר לסעיף 47</span>
-                <span class="result-value">${formatNumber(TAKROT_2025.shacharMevutachMaxLeSe47)} ₪</span>
-            </div>`;
-            
-            if (data.zikaiLeSe47) {
-                html += `<div class="result-item">
-                    <span class="result-label">זכאות לניכוי</span>
-                    <span class="result-value success">✅ כן</span>
-                </div>`;
-                html += '<div class="info-box">';
-                html += '<div class="info-box-title">💡 מה זה אומר?</div>';
-                html += '<div class="info-box-text">את/ה זכאי/ת גם לניכוי וגם לזיכוי! זה אומר שאת/ה יכול/ה לקבל הטבות מס גם על ניכוי (שמפחית את ההכנסה החייבת במס) וגם על זיכוי (הנחה ישירה במס).</div>';
-                html += '</div>';
-            } else {
-                html += `<div class="result-item">
-                    <span class="result-label">זכאות לניכוי</span>
-                    <span class="result-value danger">❌ לא</span>
-                </div>`;
-                html += '<div class="warning-box">';
-                html += '<div class="warning-title">⚠️ שים/י לב</div>';
-                html += `<div class="warning-text">השכר המבוטח שלך עובר את התקרה (${formatNumber(TAKROT_2025.shacharMevutachMaxLeSe47)} ₪), לכן את/ה זכאי/ת <strong>רק לזיכוי</strong>ולא לניכוי.</div>`;
-                html += '</div>';
-            }
-            html += '</div>';
-
-  
-// הטבות זיכוי סעיף 45א
+            // הטבות זיכוי סעיף 45א
 html += '<div class="result-box highlight">';
 html += '<div class="result-title">💰 זיכוי ממס לפי סעיף 45א</div>';
 
@@ -668,6 +617,41 @@ html += `<div class="big-number" style="background: linear-gradient(135deg, #28a
 </div>`;
 
 html += '</div>';
+
+            // בדיקת זכאות לניכוי
+            html += '<div class="result-box">';
+            html += '<div class="result-title">🔍 בדיקה #2: זכאות לניכוי (סעיף 47)</div>';
+            html += `<div class="result-item">
+                <span class="result-label">שכר מבוטח חודשי שלך</span>
+                <span class="result-value">${formatNumber(data.shacharMevutachChodshi)} ₪</span>
+            </div>`;
+            html += `<div class="result-item">
+                <span class="result-label">הכנסה מזכה לפי סעיף 47 (א)(1)</span>
+                <span class="result-value">${formatNumber(TAKROT_2025. hachnasaMezaka)} ₪</span>
+                <span class="result-label">סכום השווה לשתי פעמים וחצי הסכום האמור בפסקה (1) להגדרה "הכנסה מזכה" לשנה -תקרת שכר לסעיף 47</span>
+                <span class="result-value">${formatNumber(TAKROT_2025.shacharMevutachMaxLeSe47)} ₪</span>
+            </div>`;
+            
+            if (data.zikaiLeSe47) {
+                html += `<div class="result-item">
+                    <span class="result-label">זכאות לניכוי</span>
+                    <span class="result-value success">✅ כן</span>
+                </div>`;
+                html += '<div class="info-box">';
+                html += '<div class="info-box-title">💡 מה זה אומר?</div>';
+                html += '<div class="info-box-text">את/ה זכאי/ת גם לניכוי וגם לזיכוי! זה אומר שאת/ה יכול/ה לקבל הטבות מס גם על ניכוי (שמפחית את ההכנסה החייבת במס) וגם על זיכוי (הנחה ישירה במס).</div>';
+                html += '</div>';
+            } else {
+                html += `<div class="result-item">
+                    <span class="result-label">זכאות לניכוי</span>
+                    <span class="result-value danger">❌ לא</span>
+                </div>`;
+                html += '<div class="warning-box">';
+                html += '<div class="warning-title">⚠️ שים/י לב</div>';
+                html += `<div class="warning-text">השכר המבוטח שלך עובר את התקרה (${formatNumber(TAKROT_2025.shacharMevutachMaxLeSe47)} ₪), לכן את/ה זכאי/ת <strong>רק לזיכוי</strong>ולא לניכוי.</div>`;
+                html += '</div>';
+            }
+            html += '</div>';
 
             // הטבות ניכוי (אם זכאי)
             if (data.zikaiLeSe47 && data.nikuiFinal > 0) {
