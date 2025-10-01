@@ -369,6 +369,7 @@
             const isAmitMutav = havkadotPensia >= amitMutavYachasi;
             const missingToAmitMutav = Math.max(0, amitMutavYachasi - havkadotPensia);
             const hachnasaMezaka=TAKROT_2025.hachnasaMezaka;
+            const hachnasaMezakaShnati = TAKROT_2025.hachnasaMezaka * months;
 // ========== חישוב זיכוי סעיף 45א ==========
 
 // 1. ביטוח חיים - זיכוי על מה שכבר הפקיד
@@ -382,28 +383,29 @@ let sumMazke_PensiaMevutachet = 0;
 let zikuiPensiaMevutachet = 0;
 
 if (shacharMevutach > 0) {
-    takratPensiaMevutachet =    hachnasaMezaka * 0.07; 
+    takratPensiaMevutachet =     hachnasaMezakaShnati * 0.07; 
+
     sumMazke_PensiaMevutachet = Math.min(pensiaMevutachet, takratPensiaMevutachet);
     zikuiPensiaMevutachet = sumMazke_PensiaMevutachet * 0.35;
 }
 
 // 3. הכנסה לא מבוטחת - הפקדה פוטנציאלית
-//let takratPensiaLoMevutachet = 0;
-//let zikuiPotencialiLoMevutach = 0;
+let takratPensiaLoMevutachet = 0;
+let zikuiPotencialiLoMevutach = 0;
 
-//if (shacharLoMevutach > 0) {
-  //  if (isAmitMutav) {
+if (shacharLoMevutach > 0) {
+    if (isAmitMutav) {
         // עמית מוטב - חשב תקרה זמינה
-    //    const takra5Percent = shacharLoMevutach * 0.05;
-    //    const takraMax = TAKROT_2025.hachnasaMezaka * 2 * 12; // 232,800
-    //    const nikui = Math.min(TAKROT_2025.hachnasaMezaka * 12, shacharMevutach);
-    //    const takratMaksimalit = takraMax - nikui;
+        const takra5Percent = shacharLoMevutach * 0.05;
+        const takraMax = TAKROT_2025.hachnasaMezaka * 2 * months; 
+        const nikui = Math.min(TAKROT_2025.hachnasaMezaka * months, shacharMevutach);
+        const takratMaksimalit = Math.min(takraMax - nikui)*0.05;
         
-      //  takratPensiaLoMevutachet = Math.min(takra5Percent, takratMaksimalit);
-      //  zikuiPotencialiLoMevutach = takratPensiaLoMevutachet * 0.35;
- //   } else {
+        takratPensiaLoMevutachet = Math.min(takra5Percent, takratMaksimalit);
+       zikuiPotencialiLoMevutach = takratPensiaLoMevutachet * 0.35;
+    } else {
         // לא עמית מוטב - חשב כמה חסר + תקרה אם יהפוך
-  //      takratPensiaLoMevutachet = missingToAmitMutav; // כמה חסר להפוך לעמית מוטב
+        takratPensiaLoMevutachet = missingToAmitMutav; // כמה חסר להפוך לעמית מוטב
         
         // אם יהפוך לעמית מוטב, יוכל להפקיד:
    //     const takra5Percent = shacharLoMevutach * 0.05;
@@ -465,8 +467,8 @@ displayResults({
     takratPensiaMevutachet,
     sumMazke_PensiaMevutachet,
     zikuiPensiaMevutachet,
-    //takratPensiaLoMevutachet,  // ✅ במקום pensiaLoMevutachet
-   // zikuiPotencialiLoMevutach,  // ✅ חדש
+    takratPensiaLoMevutachet,  // ✅ במקום pensiaLoMevutachet
+    zikuiPotencialiLoMevutach,  // ✅ חדש
     //totalZikui45a,
    // zikuiPotenciali  // ✅ חדש
 });
@@ -576,29 +578,29 @@ if (data.shacharMevutach > 0) {
 }
 
 // חלק 3: פנסיה - הכנסה לא מבוטחת
-//if (data.shacharLoMevutach > 0) {
- //   html += '<div class="result-title" style="font-size: 16px; margin-top: 20px;">📋 זיכוי בעד פנסיה - הכנסה לא מבוטחת - סעיף 45א(ב) + (ה)(2)(ב)</div>';
-  //  html += `<div class="result-item">
-    //    <span class="result-label">סכום ששולם לפנסיה (מההכנסה הלא מבוטחת)</span>
-    //    <span class="result-value">${formatNumber(data.pensiaLoMevutachet)} ₪</span>
-  //  </div>`;
-  //  html += `<div class="result-item">
- //       <span class="result-label">תקרה (5% מההכנסה החייבת הלא מבוטחת)</span>
-  //      <span class="result-value">${formatNumber(data.takratPensiaLoMevutachet)} ₪</span>
-  //  </div>`;
-  //  html += `<div class="result-item">
-      //  <span class="result-label">סכום המזכה בפועל</span>
-     //   <span class="result-value">${formatNumber(data.sumMazke_PensiaLoMevutachet)} ₪</span>
-  //  </div>`;
- //   html += `<div class="result-item">
-   //     <span class="result-label">שיעור זיכוי</span>
-    //    <span class="result-value">35%</span>
-   // </div>`;
-  //  html += `<div class="result-item" style="background: #e8f5e9;">
-  //      <span class="result-label" style="font-weight: bold;">💚 זיכוי ממס - פנסיה מהכנסה לא מבוטחת</span>
-  //      <span class="result-value success">${formatNumber(data.zikuiPensiaLoMevutachet)} ₪</span>
-  //  </div>`;
-//}
+if (data.shacharLoMevutach > 0) {
+    html += '<div class="result-title" style="font-size: 16px; margin-top: 20px;">📋 זיכוי בעד פנסיה - הכנסה לא מבוטחת - סעיף 45א(ב) + (ה)(2)(ב)</div>';
+    html += `<div class="result-item">
+       <span class="result-label">סכום ששולם לפנסיה (מההכנסה הלא מבוטחת)</span>
+       <span class="result-value">${formatNumber(data.pensiaLoMevutachet)} ₪</span>
+   </div>`;
+    html += `<div class="result-item">
+       <span class="result-label">תקרה (5% מההכנסה החייבת הלא מבוטחת)</span>
+       <span class="result-value">${formatNumber(data.takratPensiaLoMevutachet)} ₪</span>
+  </div>`;
+    html += `<div class="result-item">
+       <span class="result-label">סכום המזכה בפועל</span>
+       <span class="result-value">${formatNumber(data.sumMazke_PensiaLoMevutachet)} ₪</span>
+   </div>`;
+   html += `<div class="result-item">
+     <span class="result-label">שיעור זיכוי</span>
+       <span class="result-value">35%</span>
+    </div>`;
+   html += `<div class="result-item" style="background: #e8f5e9;">
+        <span class="result-label" style="font-weight: bold;">💚 זיכוי ממס - פנסיה מהכנסה לא מבוטחת</span>
+        <span class="result-value success">${formatNumber(data.zikuiPensiaLoMevutachet)} ₪</span>
+   </div>`;
+}
 
 // סיכום כולל
 //html += `<div class="big-number" style="background: linear-gradient(135deg, #28a74515 0%, #20c99715 100%); color: #28a745; margin-top: 20px;">
