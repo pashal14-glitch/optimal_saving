@@ -295,6 +295,10 @@
                     <label>הפקדות קיימות לפנסיה (שנתי) ₪</label>
                     <input type="number" id="havkadotKayamot" placeholder="לדוגמה: 16522">
                 </div>
+                <div class="input-group">
+                    <label>הפקדות קיימות לביטוח חיים (שנתי) ₪</label>
+                    <input type="number" id="bituachChayim" placeholder="לדוגמה: 16522">
+                </div>
 
                 <div class="input-group">
                     <label>גיל</label>
@@ -350,7 +354,9 @@
             const shacharMevutach = parseFloat(document.getElementById('shacharMevutach').value) || 0;
             const shacharLoMevutach = parseFloat(document.getElementById('shacharLoMevutach').value) || 0;
             const months = parseInt(document.getElementById('months').value) || 12;
-            const havkadotKayamot = parseFloat(document.getElementById('havkadotKayamot').value) || 0;
+            const havkadotPensia = parseFloat(document.getElementById('havkadotKayamot').value) || 0;
+            const havkadotBituachChayim = parseFloat(document.getElementById('bituachChayim').value) || 0;
+            const havkadotKayamot = havkadotPensia + havkadotBituachChayim;
             const age = parseInt(document.getElementById('age').value) || 0;
 
             // בדיקת תקינות
