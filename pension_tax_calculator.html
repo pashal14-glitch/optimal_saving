@@ -559,7 +559,7 @@ html += `<div class="result-item" style="background: #e8f5e9;">
 
 // חלק 2: פנסיה - הכנסה מבוטחת
 if (data.shacharMevutach > 0) {
-    html += '<div class="result-title" style="font-size: 16px; margin-top: 20px;">📋 זיכוי בעד פנסיה - הכנסה מבוטחת - סעיף 45א(ב) + (ה)(2)(א)</div>';
+    html += '<div class="result-title" style="font-size: 16px; margin-top: 20px;">📋זיכוי בגין הכנסת עבודה מבוטחת 45א</div>';
     html += `<div class="result-item">
         <span class="result-label">סכום ששולם לפנסיה (מההכנסה המבוטחת)</span>
         <span class="result-value">${formatNumber(data.pensiaMevutachet)} ₪</span>
@@ -583,27 +583,72 @@ if (data.shacharMevutach > 0) {
 }
 
 // חלק 3: פנסיה - הכנסה לא מבוטחת
-if (data.shacharLoMevutach > 0) {
-    html += '<div class="result-title" style="font-size: 16px; margin-top: 20px;">📋 זיכוי בעד פנסיה - הכנסה לא מבוטחת - סעיף 45א(ב) + (ה)(2)(ב)</div>';
-    html += `<div class="result-item">
-       <span class="result-label">הכנסה לא מבוטחת</span>
-       <span class="result-value">${formatNumber(data.shacharLoMevutach)} ₪</span>
-   </div>`;
-    html += `<div class="result-item">
-       <span class="result-label">5% מהכנסה לא מבוטחת המוגבלת בתקרה</span>
-       <span class="result-value">${formatNumber(data.takratPensiaLoMevutachet)} ₪</span>
-  </div>`;
+//if (data.shacharLoMevutach > 0) {
+ //   html += '<div class="result-title" style="font-size: 16px; margin-top: 20px;">📋 זיכוי בכין הכנסת עבודה לא מבוטחת 45א(ה)</div>';
+ //   html += `<div class="result-item">
+  //     <span class="result-label">הכנסה לא מבוטחת</span>
+  //     <span class="result-value">${formatNumber(data.shacharLoMevutach)} ₪</span>
+  // </div>`;
+ //   html += `<div class="result-item">
+    //   <span class="result-label">5% מהכנסה לא מבוטחת המוגבלת בתקרה</span>
+  //     <span class="result-value">${formatNumber(data.takratPensiaLoMevutachet)} ₪</span>
+//  </div>`;
     
-   html += `<div class="result-item">
-     <span class="result-label">שיעור זיכוי</span>
-       <span class="result-value">35%</span>
+//   html += `<div class="result-item">
+  //   <span class="result-label">שיעור זיכוי</span>
+  //     <span class="result-value">35%</span>
+  //  </div>`;
+//   html += `<div class="result-item" style="background: #e8f5e9;">
+    //  <span class="result-label" style="font-weight: bold;">💚 זיכוי ממס - בגיו הכנסה לא מבוטחת</span>
+     //   <span class="result-value success">${formatNumber(data.zikuiPotencialiLoMevutach)} ₪</span>
+ //  </div>`;
+//}
+// חלק 3: פנסיה - הכנסה לא מבוטחת
+if (data.shacharLoMevutach > 0) {
+    html += '<div class="result-title" style="font-size: 16px; margin-top: 20px;">📋 זיכוי בגין הכנסת עבודה לא מבוטחת - סעיף 45א(ה)(2)(ב)</div>';
+    
+    if (!data.isAmitMutav) {
+        // אם לא עמית מוטב - הודעת אזהרה
+        html += '<div class="warning-box" style="margin-bottom: 15px;">';
+        html += '<div class="warning-title">⚠️ שים לב</div>';
+        html += '<div class="warning-text">';
+        html += '<strong>הטבת המס בגין הכנסה לא מבוטחת מגיעה רק לעמית מוטב!</strong><br><br>';
+        html += `תוכל ליהנות מהטבת מס זו רק בתנאי שתפקיד מינימום של <strong>${formatNumber(data.missingToAmitMutav)} ₪</strong> לקופת פנסיה, `;
+        html += 'ובכך תהפוך לעמית מוטב.<br><br>';
+        html += 'לאחר שתהפוך לעמית מוטב, תוכל ליהנות מהזיכוי המפורט להלן:';
+        html += '</div>';
+        html += '</div>';
+    }
+    
+    html += `<div class="result-item">
+        <span class="result-label">הכנסה לא מבוטחת</span>
+        <span class="result-value">${formatNumber(data.shacharLoMevutach)} ₪</span>
     </div>`;
-   html += `<div class="result-item" style="background: #e8f5e9;">
-      <span class="result-label" style="font-weight: bold;">💚 זיכוי ממס - בגיו הכנסה לא מבוטחת</span>
-        <span class="result-value success">${formatNumber(data.zikuiPotencialiLoMevutach)} ₪</span>
-   </div>`;
+    html += `<div class="result-item">
+        <span class="result-label">תקרת זיכוי: 5% מהכנסה לא מבוטחת (מוגבל בתקרה)</span>
+        <span class="result-value">${formatNumber(data.takratPensiaLoMevutachet)} ₪</span>
+    </div>`;
+    
+    html += `<div class="result-item">
+        <span class="result-label">שיעור זיכוי</span>
+        <span class="result-value">35%</span>
+    </div>`;
+    
+    html += `<div class="result-item" style="background: ${data.isAmitMutav ? '#e8f5e9' : '#fff3e0'};">
+        <span class="result-label" style="font-weight: bold;">${data.isAmitMutav ? '💚' : '⚠️'} זיכוי ממס פוטנציאלי - בגין הכנסה לא מבוטחת</span>
+        <span class="result-value ${data.isAmitMutav ? 'success' : ''}">${formatNumber(data.zikuiPotencialiLoMevutach)} ₪</span>
+    </div>`;
+    
+    if (!data.isAmitMutav) {
+        html += '<div class="explanation" style="background: #fff3cd; border-color: #ffc107;">';
+        html += '<div class="explanation-title" style="color: #856404;">💡 כיצד להפוך לעמית מוטב?</div>';
+        html += '<div class="explanation-text" style="color: #856404;">';
+        html += `הפקד <strong>${formatNumber(data.missingToAmitMutav)} ₪</strong> נוספים לקופת פנסיה בשנה זו.<br>`;
+        html += `לאחר ההפקדה, תהיה זכאי לזיכוי ממס של <strong>${formatNumber(data.zikuiPotencialiLoMevutach)} ₪</strong> בגין הכנסתך הלא מבוטחת.`;
+        html += '</div>';
+        html += '</div>';
+    }
 }
-
 // סיכום כולל
 //html += `<div class="big-number" style="background: linear-gradient(135deg, #28a74515 0%, #20c99715 100%); color: #28a745; margin-top: 20px;">
  //   ✅ סה"כ זיכוי ממס (סעיף 45א): ${formatNumber(data.totalZikui45a)} ₪
