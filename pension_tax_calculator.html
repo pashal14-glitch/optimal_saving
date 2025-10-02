@@ -392,6 +392,8 @@ if (shacharMevutach > 0) {
 // 3. הכנסה לא מבוטחת - הפקדה פוטנציאלית
 let takratPensiaLoMevutachet = 0;
 let zikuiPotencialiLoMevutach = 0;
+let takratMaksimalit =0;
+            
 
 if (shacharLoMevutach > 0) {
     if (isAmitMutav) {
@@ -408,12 +410,13 @@ if (shacharLoMevutach > 0) {
         takratPensiaLoMevutachet = missingToAmitMutav; // כמה חסר להפוך לעמית מוטב
         
         // אם יהפוך לעמית מוטב, יוכל להפקיד:
-        const takra5Percent = shacharLoMevutach * 0.05;
-         const takraMax = TAKROT_2025.hachnasaMezaka * 2 * 12;
-         const nikui = Math.min(TAKROT_2025.hachnasaMezaka * 12, shacharMevutach);
-         const takratMaksimalit = takraMax - nikui;
-         const takratLacharAmitMutav = Math.min(takra5Percent, takratMaksimalit);
-         zikuiPotencialiLoMevutach = (missingToAmitMutav + takratLacharAmitMutav) * 0.35;
+         const takra5Percent = shacharLoMevutach * 0.05;
+        const takraMax = TAKROT_2025.hachnasaMezaka * 2 * months; 
+        const nikui = Math.min(TAKROT_2025.hachnasaMezaka * months, shacharMevutach);
+        const takratMaksimalit = Math.min(takraMax - nikui)*0.05;
+        
+         takratPensiaLoMevutachet = Math.min(takra5Percent, takratMaksimalit);
+        zikuiPotencialiLoMevutach = takratPensiaLoMevutachet * 0.35;
    }
 }
 
@@ -575,7 +578,7 @@ if (data.shacharMevutach > 0) {
     </div>`;
     html += `<div class="result-item" style="background: #e8f5e9;">
         <span class="result-label" style="font-weight: bold;">💚 זיכוי ממס - פנסיה מהכנסה מבוטחת</span>
-        <span class="result-value success">${formatNumber(data.zikuiPensiaMevutachet)} ₪</span>
+        <span class="result-value success">${formatNumber(data.zikuiPotencialiLoMevutach)} ₪</span>
     </div>`;
 }
 
@@ -587,8 +590,8 @@ if (data.shacharLoMevutach > 0) {
        <span class="result-value">${formatNumber(data.shacharLoMevutach)} ₪</span>
    </div>`;
     html += `<div class="result-item">
-       <span class="result-label">5% והכנסה לא מבוטחת מוגבלת בתקרה</span>
-       <span class="result-value">${formatNumber(data.takratMaksimalit)} ₪</span>
+       <span class="result-label">5% מהכנסה לא מבוטחת המוגבלת בתקרה</span>
+       <span class="result-value">${formatNumber(data.takratPensiaLoMevutachet)} ₪</span>
   </div>`;
     
    html += `<div class="result-item">
@@ -596,8 +599,8 @@ if (data.shacharLoMevutach > 0) {
        <span class="result-value">35%</span>
     </div>`;
    html += `<div class="result-item" style="background: #e8f5e9;">
-      <span class="result-label" style="font-weight: bold;">💚 זיכוי ממס - פנסיה מהכנסה לא מבוטחת</span>
-        <span class="result-value success">${formatNumber(data.zikuiPensiaLoMevutachet)} ₪</span>
+      <span class="result-label" style="font-weight: bold;">💚 זיכוי ממס - בגיו הכנסה לא מבוטחת</span>
+        <span class="result-value success">${formatNumber(data.zikuiPotencialiLoMevutach)} ₪</span>
    </div>`;
 }
 
