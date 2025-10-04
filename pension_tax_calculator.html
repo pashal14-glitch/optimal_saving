@@ -421,7 +421,7 @@ if (shacharLoMevutach > 0) {
 }
 
 // 4. סה"כ זיכוי על מה שכבר הפקיד
-//const totalZikui45a = zikuiBituachChayim + zikuiPensiaMevutachet;
+const totalZikui45a = zikuiBituachChayim + zikuiPensiaMevutachet+zikuiPotencialiLoMevutach;
 
 // 5. זיכוי פוטנציאלי נוסף
 //const zikuiPotenciali = zikuiPotencialiLoMevutach;
@@ -474,7 +474,7 @@ displayResults({
     takratMaksimalit,
     takratPensiaLoMevutachet,  // ✅ במקום pensiaLoMevutachet
     zikuiPotencialiLoMevutach,  // ✅ חדש
-    //totalZikui45a,
+    totalZikui45a,
    // zikuiPotenciali  // ✅ חדש
 });
         }
@@ -650,9 +650,9 @@ if (data.shacharLoMevutach > 0) {
    // }
 }
 // סיכום כולל
-//html += `<div class="big-number" style="background: linear-gradient(135deg, #28a74515 0%, #20c99715 100%); color: #28a745; margin-top: 20px;">
- //   ✅ סה"כ זיכוי ממס (סעיף 45א): ${formatNumber(data.totalZikui45a)} ₪
-//</div>`;
+html += `<div class="big-number" style="background: linear-gradient(135deg, #28a74515 0%, #20c99715 100%); color: #28a745; margin-top: 20px;">
+   ✅ סה"כ זיכוי ממס (סעיף 45א): ${formatNumber(data.totalZikui45a)} ₪
+</div>`;
 
 html += '</div>';
 
