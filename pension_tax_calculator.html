@@ -306,7 +306,7 @@
                 </div>
                  <div class="input-group">
                     <label>שכר לא מעבודה  (שנתי) ₪</label>
-                    <input type="number" id="shacharLoMeAvoda" placeholder="לדוגמה: 700000">
+                    <input type="number" id="shacharLoMeAvoda" placeholder="לדוגמה: 100000">
                 </div>
 
                 <button class="btn" onclick="calculate()">🔍 חשב הטבות מס</button>
@@ -362,6 +362,7 @@
         function calculate() {
             // קריאת ערכים
             const shacharMevutach = parseFloat(document.getElementById('shacharMevutach').value) || 0;
+            const shacharMevutach = parseFloat(document.getElementById('shacharLoMeAvoda').value) || 0;
             const shacharLoMevutach = parseFloat(document.getElementById('shacharLoMevutach').value) || 0;
             const months = parseInt(document.getElementById('months').value) || 12;
             const havkadotPensia = parseFloat(document.getElementById('havkadotPensia').value) || 0;
