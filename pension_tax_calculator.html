@@ -433,11 +433,10 @@ const totalZikui45a = zikuiBituachChayim + zikuiPensiaMevutachet+zikuiPotenciali
 
  // 5.זיכוי בגין הכנסה לא מעבודה
 const takratshacharLoMeAvoda =  hachnasaMezaka2*months;         
-let shacharLoMeAvodaBefoal=0;            
+let shacharLoMeAvodaBefoal=shacharLoMeAvoda;            
 let zikuishacharLoMeAvoda = 0;
 
 if (shacharLoMeAvoda > 0) {
-     shacharLoMeAvodaBefoal=shacharLoMeAvoda
     takratshacharLoMeAvoda =Math.min(shacharLoMeAvoda,takratshacharLoMeAvoda);
     zikuishacharLoMeAvoda = takratshacharLoMeAvoda * 0.35*0.05;
 }
