@@ -393,11 +393,14 @@ let sumMazke_PensiaMevutachet = 0;
 let zikuiPensiaMevutachet = 0;
 
 if (shacharMevutach > 0) {
+ if (isAmitMutav) {
     takratPensiaMevutachet =     hachnasaMezakaShnati * 0.07; 
-
     sumMazke_PensiaMevutachet = Math.min(pensiaMevutachet, takratPensiaMevutachet);
     zikuiPensiaMevutachet = sumMazke_PensiaMevutachet * 0.35;
-}
+} else {
+    sumMazke_PensiaMevutachet = Math.min((pensiaMevutachet+shacharLoMevutach), takratPensiaMevutachet);
+    zikuiPensiaMevutachet = sumMazke_PensiaMevutachet * 0.35;
+ }
 
 // 3. הכנסה לא מבוטחת - הפקדה פוטנציאלית
 let takratPensiaLoMevutachet = 0;
@@ -455,10 +458,14 @@ const totalZikui45a = zikuiBituachChayim + zikuiPensiaMevutachet+zikuiPotenciali
        
            // בדיקת זכאות לסעיף 47 (ניכוי)
             const zikaiLeSe47 = shacharMevutachChodshi <= TAKROT_2025.shacharMevutachMaxLeSe47;
+            const nikuiRateHachasaLoMeAvoda = (havkadotPensia > shacharLoMeAvoda * 0.12) ? 0.11 : 0.07;
+            const nikuiRateshacharLoMevutach = (havkadotPensia > shacharLoMevutach * 0.12) ? 0.11 : 0.07;
+
 
             // חישוב ניכוי (אם זכאי)
             const shacharMevutachMaxLeSe47 = TAKROT_2025.shacharMevutachMaxLeSe47;
             const nikuiRateAmitMutav = age >= 50 ? TAKROT_2025.nikuiRateAge50 : TAKROT_2025.nikuiRateNormal;
+            
             let nikuiTaxBenefit47 = 0;
             let HachnasaAmitAzmai = 0;
             let HachnasaNosefet = 0;
@@ -475,11 +482,11 @@ const totalZikui45a = zikuiBituachChayim + zikuiPensiaMevutachet+zikuiPotenciali
                         Math.min(shacharLoMevutach, hachnasaMezaka * months),
                         (Math.min(HachasaHaevet, shacharMevutachMaxLeSe47 * months) - Math.max(shacharMevutach, hachnasaMezaka * months))
                     ));
-                    nikuiTaxBenefit47 = Math.max(HachnasaAmitAzmai * nikuiRateAmitMutav, HachnasaNosefet * 0.07);
+                    nikuiTaxBenefit47 = Math.max(HachnasaAmitAzmai * nikuiRateAmitMutav, HachnasaNosefet *nikuiRateshacharLoMevutach );
                 } else {
                     // לא עמית מוטב - ניכוי של 7% על הכנסה לא מבוטחת
                     maxTakratNikuiLoAmitMutav = Math.min(shacharLoMevutach, (shacharMevutachMaxLeSe47 * months - shacharMevutach)) * 0.05;
-                    nikuiTaxBenefit47 = maxTakratNikuiLoAmitMutav * 0.07;
+                    nikuiTaxBenefit47 = maxTakratNikuiLoAmitMutav *nikuiRateHachasaLoMeAvoda;
                 }
             }
 
