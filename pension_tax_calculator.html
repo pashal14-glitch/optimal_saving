@@ -331,7 +331,7 @@
             amitMutavShanati: 25566.72,
             
             // תקרת שכר מבוטח חודשי לזכאות לסעיף 47 (ניכוי)
-            shacharMevutachMaxLeSe47: 24250,
+            shacharMevutachMaxLeSe47: 24250, //9700*2.5
             
             // תקרת זיכוי מקסימלית לעמית מוטב
             zikuiMaxAmitMutav: 11640,
@@ -438,7 +438,7 @@ let zikuishacharLoMeAvoda = 0;
 let sumMazke_shacharLoMeAvoda = 0;
             
 if (shacharLoMeAvoda > 0) {
-     takratshacharLoMeAvoda =  (hachnasaMezaka2*months-(Math.min(hachnasaMezaka*months,(shacharLoMevutach+shacharMevutach))));
+    takratshacharLoMeAvoda =  (hachnasaMezaka2*months-(Math.min(hachnasaMezaka*months,(shacharLoMevutach+shacharMevutach))));
     sumMazke_shacharLoMeAvoda =Math.min(shacharLoMeAvodaBefoal,takratshacharLoMeAvoda);
     zikuishacharLoMeAvoda = sumMazke_shacharLoMeAvoda * 0.35*0.05;
 }
@@ -448,27 +448,37 @@ const totalZikui45a = zikuiBituachChayim + zikuiPensiaMevutachet+zikuiPotenciali
 // 6. זיכוי פוטנציאלי נוסף
 //const zikuiPotenciali = zikuiPotencialiLoMevutach;
             
-  // בדיקת זכאות לסעיף 47 (ניכוי)
+       
+           // בדיקת זכאות לסעיף 47 (ניכוי)
             const zikaiLeSe47 = shacharMevutachChodshi <= TAKROT_2025.shacharMevutachMaxLeSe47;
 
-            // חישוב זיכוי
-            const maxZikuiTakra = isAmitMutav ? TAKROT_2025.zikuiMaxAmitMutav : TAKROT_2025.zikuiMaxLoMutav;
-            const zikui5Percent = shacharLoMevutach * 0.05;
-            const zikuiFinal = Math.min(zikui5Percent, maxZikuiTakra);
-            const zikuiTaxBenefit = zikuiFinal * TAKROT_2025.zikuiRate;
-
             // חישוב ניכוי (אם זכאי)
-            let nikuiFinal = 0;
+            const shacharMevutachMaxLeSe47 = TAKROT_2025.shacharMevutachMaxLeSe47;
+            const nikuiRateAmitMutav = age >= 50 ? TAKROT_2025.nikuiRateAge50 : TAKROT_2025.nikuiRateNormal;
             let nikuiTaxBenefit47 = 0;
-            let nikuiTaxBenefit35 = 0;
+            let HachnasaAmitAzmai = 0;
+            let HachnasaNosefet = 0;
+            let HachasaHaevet = 0;
+            let maxTakratNikuiLoAmitMutav = 0;
+           
             
             if (zikaiLeSe47) {
-                const nikuiRate = age >= 50 ? TAKROT_2025.nikuiRateAge50 : TAKROT_2025.nikuiRateNormal;
-                const nikuiPercent = shacharLoMevutach * nikuiRate;
-                nikuiFinal = Math.min(nikuiPercent, TAKROT_2025.nikuiMax);
-                nikuiTaxBenefit47 = nikuiFinal * 0.47;
-                nikuiTaxBenefit35 = nikuiFinal * 0.35;
+                if (isAmitMutav) {
+                    // עמית מוטב - חישוב לפי סעיף 47
+                    HachasaHaevet = shacharLoMevutach + shacharMevutach;
+                    HachnasaAmitAzmai = Math.max(0, Math.min(hachnasaMezaka * months, HachasaHaevet) - shacharMevutach);
+                    HachnasaNosefet = Math.max(0, Math.min(
+                        Math.min(shacharLoMevutach, hachnasaMezaka * months),
+                        (Math.min(HachasaHaevet, shacharMevutachMaxLeSe47 * months) - Math.max(shacharMevutach, hachnasaMezaka * months))
+                    ));
+                    nikuiTaxBenefit47 = Math.max(HachnasaAmitAzmai * nikuiRateAmitMutav, HachnasaNosefet * 0.07);
+                } else {
+                    // לא עמית מוטב - ניכוי של 7% על הכנסה לא מבוטחת
+                    maxTakratNikuiLoAmitMutav = Math.min(shacharLoMevutach, (shacharMevutachMaxLeSe47 * months - shacharMevutach)) * 0.05;
+                    nikuiTaxBenefit47 = maxTakratNikuiLoAmitMutav * 0.07;
+                }
             }
+
 displayResults({
     shacharMevutach,
     shacharLoMevutach,
@@ -481,11 +491,6 @@ displayResults({
     amitMutavYachasi,
     missingToAmitMutav,
     zikaiLeSe47,
-    zikuiFinal,
-    zikuiTaxBenefit,
-    nikuiFinal,
-    nikuiTaxBenefit47,
-    nikuiTaxBenefit35,
     bituachChayimShalem,
     zikuiBituachChayim,
     pensiaMevutachet,
@@ -501,7 +506,13 @@ displayResults({
     shacharLoMeAvodaBefoal,
     takratshacharLoMeAvoda,
     sumMazke_shacharLoMeAvoda,
-    zikuishacharLoMeAvoda 
+    zikuishacharLoMeAvoda,
+         maxTakratNikuiLoAmitMutav,
+         nikuiTaxBenefit47,
+         HachnasaAmitAzmai,
+         HachnasaNosefet,
+         HachasaHaevet
+           
    // zikuiPotenciali  // ✅ חדש
 });
         }
@@ -683,18 +694,38 @@ html += '</div>';
                 <span class="result-label">שכר מבוטח חודשי שלך</span>
                 <span class="result-value">${formatNumber(data.shacharMevutachChodshi)} ₪</span>
             </div>`;
-            html += `<div class="result-item">
-                <span class="result-label">הכנסה מזכה לפי סעיף 47 (א)(1)</span>
-                <span class="result-value">${formatNumber(TAKROT_2025. hachnasaMezaka)} ₪</span>
-                <span class="result-label">סכום השווה לשתי פעמים וחצי הסכום האמור בפסקה (1) להגדרה "הכנסה מזכה" לשנה -תקרת שכר לסעיף 47</span>
-                <span class="result-value">${formatNumber(TAKROT_2025.shacharMevutachMaxLeSe47)} ₪</span>
-            </div>`;
             
             if (data.zikaiLeSe47) {
                 html += `<div class="result-item">
                     <span class="result-label">זכאות לניכוי</span>
                     <span class="result-value success">✅ כן</span>
                 </div>`;
+
+                 html += `<div class="result-item">
+                <span class="result-label">הכנסה חייבת </span>
+                <span class="result-value">${formatNumber(data.HachasaHaevet)} ₪</span>
+            </div>`;
+             html += `<div class="result-item">
+                <span class="result-label">  הכנסה לעמית עצמאי (עמית מוטב בלבד) </span>
+                <span class="result-value">${formatNumber(data.HachnasaAmitAzmai)} ₪</span>
+            </div>`;
+             html += `<div class="result-item">
+                <span class="result-label"> הכנסה נוספת(לעמית מוטב בלבד) </span>
+                <span class="result-value">${formatNumber(data.HachnasaNosefet)} ₪</span>
+            </div>`;
+
+
+               html += `<div class="result-item">
+                <span class="result-label">סה"כ ניכוי לפי סעיף 47</span>
+                <span class="result-value">${formatNumber(data.nikuiTaxBenefit47)} ₪</span>
+            </div>`;
+
+
+            
+         
+           
+
+              
                 html += '<div class="info-box">';
                 html += '<div class="info-box-title">💡 מה זה אומר?</div>';
                 html += '<div class="info-box-text">את/ה זכאי/ת גם לניכוי וגם לזיכוי! זה אומר שאת/ה יכול/ה לקבל הטבות מס גם על ניכוי (שמפחית את ההכנסה החייבת במס) וגם על זיכוי (הנחה ישירה במס).</div>';
