@@ -483,11 +483,15 @@ const totalZikui45a = zikuiBituachChayim + zikuiPensiaMevutachet+zikuiPotenciali
                         Math.min(shacharLoMevutach, hachnasaMezaka * months),
                         (Math.min(HachasaHaevet, shacharMevutachMaxLeSe47 * months) - Math.max(shacharMevutach, hachnasaMezaka * months))
                     ));
-                    nikuiTaxBenefit47 = Math.max(HachnasaAmitAzmai * nikuiRateAmitMutav, HachnasaNosefet *nikuiRateshacharLoMevutach );
+                    nikuiTaxBenefit47 = (HachnasaAmitAzmai * nikuiRateAmitMutav+HachnasaNosefet *nikuiRateshacharLoMevutach );
                 } else {
-                    // לא עמית מוטב - ניכוי של 7% על הכנסה לא מבוטחת
+//הניכוי לא יעלה על –
+//(1) 7% מהכנסתו המזכה שאיננה הכנסת עבודה; ואולם אם שילם סכום העולה על 12% מהכנסתו כאמור, יותר לו, בשל החלק העולה על 12% כאמור, ניכוי נוסף עד ל-4% מאותה הכנסה;
+//(2) הסכום הנמוך מבין אלה:
+//(א) 5% מהכנסתו המזכה שהיא הכנסת עבודה שאינה הכנסה מבוטחת;
+//(ב) 5% מהכנסתו החייבת שהיא הכנסת עבודה עד לסכום השווה לשתי פעמים וחצי הסכום האמור בפסקה (1) להגדרה "הכנסה מזכה" לשנה, בניכוי הכנסתו המבוטחת.
                     maxTakratNikuiLoAmitMutav = Math.min(shacharLoMevutach, (shacharMevutachMaxLeSe47 * months - shacharMevutach)) * 0.05;
-                    nikuiTaxBenefit47 = maxTakratNikuiLoAmitMutav *nikuiRateHachasaLoMeAvoda;
+                    nikuiTaxBenefit47 = Math.min(maxTakratNikuiLoAmitMutav, shacharLoMeAvoda*nikuiRateHachasaLoMeAvoda);
                 }
             }
 
