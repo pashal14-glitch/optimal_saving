@@ -438,7 +438,7 @@ let zikuishacharLoMeAvoda = 0;
 let sumMazke_shacharLoMeAvoda = 0;
             
 if (shacharLoMeAvoda > 0) {
-    takratshacharLoMeAvoda =  (hachnasaMezaka2*months-hachnasaMezaka*months);
+     takratshacharLoMeAvoda =  (hachnasaMezaka2*months-(Math.min(hachnasaMezaka*months,(shacharLoMevutach+shacharMevutach))));
     sumMazke_shacharLoMeAvoda =Math.min(shacharLoMeAvodaBefoal,takratshacharLoMeAvoda);
     zikuishacharLoMeAvoda = sumMazke_shacharLoMeAvoda * 0.35*0.05;
 }
@@ -448,7 +448,7 @@ const totalZikui45a = zikuiBituachChayim + zikuiPensiaMevutachet+zikuiPotenciali
 // 6. זיכוי פוטנציאלי נוסף
 //const zikuiPotenciali = zikuiPotencialiLoMevutach;
             
-            // בדיקת זכאות לסעיף 47 (ניכוי)
+  // בדיקת זכאות לסעיף 47 (ניכוי)
             const zikaiLeSe47 = shacharMevutachChodshi <= TAKROT_2025.shacharMevutachMaxLeSe47;
 
             // חישוב זיכוי
