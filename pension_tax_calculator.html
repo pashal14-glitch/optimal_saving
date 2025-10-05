@@ -536,6 +536,7 @@ displayResults({
 
         function displayResults(data) {
             const resultsDiv = document.getElementById('results');
+            const isAmitMutav = data.isAmitMutav; // ✅ הוסיפי שורה זו
             
             let html = '<div class="result-box highlight">';
             html += '<div class="result-title">📊 סיכום מצבך</div>';
@@ -642,7 +643,20 @@ if (data.shacharMevutach > 0) {
 }
 
 // חלק 3: פנסיה - הכנסה לא מבוטחת
-if (data.shacharLoMevutach > 0) {
+}
+
+// הודעה ליחיד שאינו עמית מוטב
+if (data.shacharLoMevutach > 0 && !isAmitMutav) {
+    html += '<div class="warning-box" style="margin-top: 20px;">';
+    html += '<div class="warning-title">🔒 זיכוי בגין הכנסה לא מבוטחת - לא זמין</div>';
+    html += '<div class="warning-text">';
+    html += '<strong>הזיכוי הזה זמין רק לעמית מוטב!</strong><br><br>';
+    html += `כדי לקבל גישה לזיכוי זה, עליך להפקיד עוד <strong>${formatNumber(data.missingToAmitMutav)} ₪</strong> לפנסיה.<br>`;
+    html += `אז תוכל לקבל זיכוי ממס של עד <strong>${formatNumber(data.zikuiPotencialiLoMevutach)} ₪</strong>!`;
+    html += '</div>';
+    html += '</div>';
+}            
+if (data.shacharLoMevutach > 0 && isAmitMutav) {
     html += '<div class="result-title" style="font-size: 16px; margin-top: 20px;">📋 זיכוי בגין הכנסת עבודה לא מבוטחת - סעיף 45א(ה)(2)(ב)</div>';
     
     if (!data.isAmitMutav) {
@@ -682,7 +696,7 @@ if (data.shacharLoMevutach > 0) {
     </div>`;      
 }
             // חלק 5 זיכוי בגין שכר לא מעבודה 
-if (data.shacharMevutach > 0) {
+if (data.shacharLoMeAvodah > 0) {
     html += '<div class="result-title" style="font-size: 16px; margin-top: 20px;">📋זיכוי בגין הכנסה לא מעבודה 45א</div>';
     html += `<div class="result-item">
         <span class="result-label">הכנסה לא מעבודה </span>
