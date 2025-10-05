@@ -433,12 +433,15 @@ if (shacharLoMevutach > 0) {
 const totalZikui45a = zikuiBituachChayim + zikuiPensiaMevutachet+zikuiPotencialiLoMevutach;
 
  // 5.זיכוי בגין הכנסה לא מעבודה
-const takratshacharLoMeAvoda =  hachnasaMezaka2*months;         
-let shacharLoMeAvodaBefoal=shacharLoMeAvoda;            
+            
+let shacharLoMeAvodaBefoal=shacharLoMeAvoda; 
+let takratshacharLoMeAvoda=0;
 let zikuishacharLoMeAvoda = 0;
-
+let sumMazke_shacharLoMeAvoda = 0;
+            
 if (shacharLoMeAvoda > 0) {
-    takratshacharLoMeAvoda =Math.min(shacharLoMeAvodaBefoal,takratshacharLoMeAvoda);
+    takratshacharLoMeAvoda =  (hachnasaMezaka2*months-hachnasaMezaka1*months);
+    sumMazke_shacharLoMeAvoda =Math.min(shacharLoMeAvodaBefoal,takratshacharLoMeAvoda);
     zikuishacharLoMeAvoda = takratshacharLoMeAvoda * 0.35*0.05;
 }
 
@@ -498,6 +501,7 @@ displayResults({
     shacharLoMeAvoda,
     shacharLoMeAvodaBefoal,
     takratshacharLoMeAvoda,
+    sumMazke_shacharLoMeAvoda,
     zikuishacharLoMeAvoda 
    // zikuiPotenciali  // ✅ חדש
 });
@@ -655,7 +659,7 @@ if (data.shacharMevutach > 0) {
     </div>`;
     html += `<div class="result-item">
         <span class="result-label">תקרת שכר לא מעבודה סעיף 47א2 </span>
-        <span class="result-value">${formatNumber(data.takratshacharLoMeAvoda)} ₪</span>
+        <span class="result-value">${formatNumber(data.sumMazke_shacharLoMeAvoda)} ₪</span>
     </div>`;
       html += `<div class="result-item">
         <span class="result-label">שיעור זיכוי</span>
