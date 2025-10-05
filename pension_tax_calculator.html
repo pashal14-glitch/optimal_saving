@@ -429,10 +429,8 @@ if (shacharLoMevutach > 0) {
    }
 }
 
-// 4. סה"כ זיכוי על מה שכבר הפקיד
-const totalZikui45a = zikuiBituachChayim + zikuiPensiaMevutachet+zikuiPotencialiLoMevutach;
 
- // 5.זיכוי בגין הכנסה לא מעבודה
+ // 4.זיכוי בגין הכנסה לא מעבודה
             
 let shacharLoMeAvodaBefoal=shacharLoMeAvoda; 
 let takratshacharLoMeAvoda=0;
@@ -442,9 +440,10 @@ let sumMazke_shacharLoMeAvoda = 0;
 if (shacharLoMeAvoda > 0) {
     takratshacharLoMeAvoda =  (hachnasaMezaka2*months-hachnasaMezaka1*months);
     sumMazke_shacharLoMeAvoda =Math.min(shacharLoMeAvodaBefoal,takratshacharLoMeAvoda);
-    zikuishacharLoMeAvoda = takratshacharLoMeAvoda * 0.35*0.05;
+    zikuishacharLoMeAvoda = sumMazke_shacharLoMeAvoda * 0.35*0.05;
 }
-
+// 5. סה"כ זיכוי על מה שכבר הפקיד
+const totalZikui45a = zikuiBituachChayim + zikuiPensiaMevutachet+zikuiPotencialiLoMevutach+zikuishacharLoMeAvoda;
 
 // 6. זיכוי פוטנציאלי נוסף
 //const zikuiPotenciali = zikuiPotencialiLoMevutach;
