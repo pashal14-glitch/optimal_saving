@@ -402,6 +402,7 @@ if (shacharMevutach > 0) {
 let takratPensiaLoMevutachet = 0;
 let zikuiPotencialiLoMevutach = 0;
 let takratMaksimalit =0;
+let takratMaxLoMevutahet=0;
             
 
 if (shacharLoMevutach > 0) {
@@ -410,8 +411,9 @@ if (shacharLoMevutach > 0) {
         const takra5Percent = shacharLoMevutach * 0.05;
         const takraMax = TAKROT_2025.hachnasaMezaka * 2 * months; 
         const nikui = Math.min(TAKROT_2025.hachnasaMezaka * months, shacharMevutach);
-        const takratMaksimalit = Math.min(takraMax - nikui)*0.05;
+        const takratMaksimalit = ((Math.min(takraMax,shacharLoMevutach)) - nikui)*0.05;
         
+        takratMaxLoMevutahet=  Math.min(takraMax,shacharLoMevutach) - nikui ;   
         takratPensiaLoMevutachet = Math.min(takra5Percent, takratMaksimalit);
        zikuiPotencialiLoMevutach = takratPensiaLoMevutachet * 0.35;
     } else {
@@ -419,13 +421,14 @@ if (shacharLoMevutach > 0) {
         takratPensiaLoMevutachet = missingToAmitMutav; // כמה חסר להפוך לעמית מוטב
         
         // אם יהפוך לעמית מוטב, יוכל להפקיד:
-         const takra5Percent = shacharLoMevutach * 0.05;
+          const takra5Percent = shacharLoMevutach * 0.05;
         const takraMax = TAKROT_2025.hachnasaMezaka * 2 * months; 
         const nikui = Math.min(TAKROT_2025.hachnasaMezaka * months, shacharMevutach);
-        const takratMaksimalit = Math.min(takraMax - nikui)*0.05;
+        const takratMaksimalit = ((Math.min(takraMax,shacharLoMevutach)) - nikui)*0.05;
         
-         takratPensiaLoMevutachet = Math.min(takra5Percent, takratMaksimalit);
-        zikuiPotencialiLoMevutach = takratPensiaLoMevutachet * 0.35;
+       takratMaxLoMevutahet=  Math.min(takraMax,shacharLoMevutach) - nikui ;    
+        takratPensiaLoMevutachet = Math.min(takra5Percent, takratMaksimalit);
+       zikuiPotencialiLoMevutach = takratPensiaLoMevutachet * 0.35;
    }
 }
 
@@ -511,7 +514,8 @@ displayResults({
          nikuiTaxBenefit47,
          HachnasaAmitAzmai,
          HachnasaNosefet,
-         HachasaHaevet
+         HachasaHaevet,
+         takratMaxLoMevutahet
            
    // zikuiPotenciali  // ✅ חדש
 });
@@ -644,6 +648,10 @@ if (data.shacharLoMevutach > 0) {
     html += `<div class="result-item">
         <span class="result-label">הכנסה לא מבוטחת</span>
         <span class="result-value">${formatNumber(data.shacharLoMevutach)} ₪</span>
+    </div>`;
+    html += `<div class="result-item">
+        <span class="result-label">תקרת הכנסה לא מבוטחת</span>
+        <span class="result-value">${formatNumber(data.takratMaxLoMevutahet)} ₪</span>
     </div>`;
     html += `<div class="result-item">
         <span class="result-label">תקרת זיכוי: 5% מהכנסה לא מבוטחת (מוגבל בתקרה)</span>
