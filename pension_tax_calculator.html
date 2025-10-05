@@ -398,7 +398,8 @@ if (shacharMevutach > 0) {
     sumMazke_PensiaMevutachet = Math.min(pensiaMevutachet, takratPensiaMevutachet);
     zikuiPensiaMevutachet = sumMazke_PensiaMevutachet * 0.35;
 } else {
-    sumMazke_PensiaMevutachet = Math.min((pensiaMevutachet+shacharLoMevutach), takratPensiaMevutachet);
+    takratPensiaMevutachet =     hachnasaMezakaShnati * 0.07;
+    sumMazke_PensiaMevutachet = Math.min((shacharMevutach+shacharLoMevutach), takratPensiaMevutachet);
     zikuiPensiaMevutachet = sumMazke_PensiaMevutachet * 0.35;
  }
 }
