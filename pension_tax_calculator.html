@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
@@ -89,6 +88,10 @@
             border-color: #667eea;
         }
 
+        input[type="file"] {
+            display: none;
+        }
+
         .btn {
             width: 100%;
             padding: 15px;
@@ -100,10 +103,38 @@
             font-weight: bold;
             cursor: pointer;
             transition: transform 0.2s;
+            margin-bottom: 10px;
         }
 
         .btn:hover {
             transform: translateY(-2px);
+        }
+
+        .btn-upload {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        }
+
+        .upload-status {
+            text-align: center;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            font-weight: bold;
+            display: none;
+        }
+
+        .upload-status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+
+        .upload-status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
         }
 
         .results {
@@ -277,6 +308,13 @@
             <div class="section">
                 <div class="section-title">📝 הזנת נתונים</div>
                 
+                <!-- כפתור טעינת ניתוח מס -->
+                <input type="file" id="htmlFileInput" accept=".html,.htm" style="display: none;">
+                <button class="btn btn-upload" onclick="document.getElementById('htmlFileInput').click()">
+                    📄 טען ניתוח מס
+                </button>
+                <div id="uploadStatus" class="upload-status"></div>
+                
                 <div class="input-group">
                     <label>שכר ברוטו מבוטח (שנתי) ₪</label>
                     <input type="number" id="shacharMevutach" placeholder="לדוגמה: 700000">
@@ -318,6 +356,332 @@
     </div>
 
     <script>
+        // ============= פונקציות טעינת HTML =============
+
+document.getElementById('htmlFileInput').addEventListener('change', async function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    const statusDiv = document.getElementById('uploadStatus');
+    
+    try {
+        // קריאת הקובץ עם קידוד windows-1255
+        const arrayBuffer = await file.arrayBuffer();
+        const decoder = new TextDecoder('windows-1255');
+        const htmlContent = decoder.decode(arrayBuffer);
+        
+        const extractedData = parseHtmlFile(htmlContent);
+        
+        if (extractedData.success) {
+            fillFormFields(extractedData);
+            statusDiv.className = 'upload-status success';
+            statusDiv.textContent = '✅ הנתונים נטענו בהצלחה! אנא בדוק ועדכן את הגיל.';
+        } else {
+            statusDiv.className = 'upload-status error';
+            statusDiv.textContent = '❌ שגיאה: ' + extractedData.error;
+        }
+    } catch (error) {
+        statusDiv.className = 'upload-status error';
+        statusDiv.textContent = '❌ שגיאה בקריאת הקובץ: ' + error.message;
+    }
+});
+
+        function parseHtmlFile(htmlContent) {
+    try {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(htmlContent, 'text/html');
+        
+        const result = {
+            success: false,
+            shacharMevutach: 0,
+            shacharLoMevutach: 0,
+            months: 0,
+            havkadotPensia: 0,
+            bituachChayim: 0,
+            error: ''
+        };
+
+        console.log('=== התחלת ניתוח הקובץ ===');
+       
+
+  // 1. חישוב מספר חודשים מטבלת "יחידות מס"
+        const yehidotMasTable = findTableByPartialTitle(doc, 'h1', ['יחידות מס']);
+        
+        if (yehidotMasTable) {
+            const monthCells = yehidotMasTable.querySelectorAll('tr:first-child td');
+            let monthCount = 0;
+            monthCells.forEach(cell => {
+                const value = parseFloat(cell.textContent.trim());
+                if (!isNaN(value) && value > 0 && value <= 31) {
+                    monthCount++;
+                }
+            });
+            if (monthCount > 0 && monthCount <= 12) {
+                result.months = monthCount;
+                console.log('✅ מספר חודשים:', monthCount);
+            }
+        }
+
+
+
+
+// 2. חילוץ שכר מבוטח - רק מטבלת "נתוני עזר לחישוב ההטבות"
+console.log('מחפש טבלת נתוני עזר...');
+const natuneyEzerTable = findTableAfterH3(doc, 'נתוני  עזר לחישוב ההטבות');
+
+if (natuneyEzerTable) {
+    console.log('✅ נמצאה טבלת נתוני עזר');
+    const rows = natuneyEzerTable.querySelectorAll('tr');
+    
+    rows.forEach((row, rowIndex) => {
+        const cells = row.querySelectorAll('th, td');
+        
+        cells.forEach((cell, cellIndex) => {
+            const cellText = cell.textContent.trim();
+            
+            // שכר לא מבוטח פנסיונית
+            if (cellText.includes('הכנסת עבודה לא') && cellText.includes('מבוטחת פנסיונית')) {
+                const nextRow = rows[rowIndex + 1];
+                if (nextRow) {
+                    const nextCells = nextRow.querySelectorAll('th, td');
+                    if (nextCells[cellIndex]) {
+                        const value = parseFloat(nextCells[cellIndex].textContent.trim().replace(/,/g, ''));
+                        if (!isNaN(value) && value > 0) {
+                            result.shacharLoMevutach = value;
+                            console.log('✅ שכר לא מבוטח:', value);
+                        }
+                    }
+                }
+            }
+            
+            // הכנסה פנסיה הוני עד תקרה
+            if (cellText === 'הכנסה פנסיה הוני עד תקרה') {
+                const nextRow = rows[rowIndex + 1];
+                if (nextRow) {
+                    const nextCells = nextRow.querySelectorAll('th, td');
+                    if (nextCells[cellIndex]) {
+                        const value = parseFloat(nextCells[cellIndex].textContent.trim().replace(/,/g, ''));
+                        if (!isNaN(value) && value > 0) {
+                            result.shacharMevutach += value;
+                            console.log('✅ פנסיה הוני:', value);
+                        }
+                    }
+                }
+            }
+            
+            // הכנסה לקצבה לא מקיפה עד תקרה
+                    if (cellText === 'הכנסה לקצבה לא מקיפה עד תקרה') {
+                        const nextRow = rows[rowIndex + 1];
+                        if (nextRow) {
+                            const nextCells = nextRow.querySelectorAll('th, td');
+                            if (nextCells[cellIndex]) {
+                                const value = parseFloat(nextCells[cellIndex].textContent.trim().replace(/,/g, ''));
+                                if (!isNaN(value) && value > 0) {
+                                    result.shacharMevutach += value;
+                                    console.log('✅ קצבה לא מקיפה:', value);
+                                }
+                            }
+                        }
+                    }
+                    
+                    // הכנסה לקצבה עד תקרה
+                    if (cellText === 'הכנסה לקצבה עד תקרה (עד 2009 רק מקיפה)') {
+                        const nextRow = rows[rowIndex + 1];
+                        if (nextRow) {
+                            const nextCells = nextRow.querySelectorAll('th, td');
+                            if (nextCells[cellIndex]) {
+                                const value = parseFloat(nextCells[cellIndex].textContent.trim().replace(/,/g, ''));
+                                if (!isNaN(value) && value > 0) {
+                                    result.shacharMevutach += value;
+                                    console.log('✅ קצבה עד תקרה:', value);
+                                }
+                            }
+                        }
+                    }
+                    
+                    // ברוטו פנסיה תקציבית
+                    if (cellText === 'ברוטו פנסיה תקציבית') {
+                        const nextRow = rows[rowIndex + 1];
+                        if (nextRow) {
+                            const nextCells = nextRow.querySelectorAll('th, td');
+                            if (nextCells[cellIndex]) {
+                                const value = parseFloat(nextCells[cellIndex].textContent.trim().replace(/,/g, ''));
+                                if (!isNaN(value) && value > 0) {
+                                    result.shacharMevutach += value;
+                                    console.log('✅ פנסיה תקציבית:', value);
+                                }
+                            }
+                        }
+                    }
+        });
+    });
+}
+
+
+        // 3. חילוץ נתונים מכל הטבלאות
+        const allTables = doc.querySelectorAll('table');
+        console.log('סה"כ טבלאות בקובץ:', allTables.length);
+        
+        allTables.forEach((table, tableIndex) => {
+            const rows = table.querySelectorAll('tr');
+            
+            rows.forEach((row, rowIndex) => {
+                const cells = row.querySelectorAll('th, td');
+                
+                // עבור על כל תא ובדוק את התוכן
+                cells.forEach((cell, cellIndex) => {
+                    const cellText = cell.textContent.trim();
+                      
+                    // חסכון ביטוח חיים
+                    if (cellText === 'חסכון בטוח חיים') {
+                        const nextRow = rows[rowIndex + 1];
+                        if (nextRow) {
+                            const nextCells = nextRow.querySelectorAll('th, td');
+                            if (nextCells[cellIndex]) {
+                                const value = parseFloat(nextCells[cellIndex].textContent.trim().replace(/,/g, ''));
+                                if (!isNaN(value) && value > 0) {
+                                    result.bituachChayim = value;
+                                    console.log('✅ ביטוח חיים:', value);
+                                }
+                            }
+                        }
+                    }
+                    
+                    // חסכון פנסיה הוני- שכיר
+                    if (cellText === 'חסכון פנסיה הוני- שכיר') {
+                        const nextRow = rows[rowIndex + 1];
+                        if (nextRow) {
+                            const nextCells = nextRow.querySelectorAll('th, td');
+                            if (nextCells[cellIndex]) {
+                                const value = parseFloat(nextCells[cellIndex].textContent.trim().replace(/,/g, ''));
+                                if (!isNaN(value) && value > 0) {
+                                    result.havkadotPensia += value;
+                                    console.log('✅ פנסיה הוני שכיר:', value);
+                                }
+                            }
+                        }
+                    }
+                    
+                    // חסכון קצבה לא מקיפה - שכיר
+                    if (cellText === 'חסכון קצבה לא מקיפה - שכיר') {
+                        const nextRow = rows[rowIndex + 1];
+                        if (nextRow) {
+                            const nextCells = nextRow.querySelectorAll('th, td');
+                            if (nextCells[cellIndex]) {
+                                const value = parseFloat(nextCells[cellIndex].textContent.trim().replace(/,/g, ''));
+                                if (!isNaN(value) && value > 0) {
+                                    result.havkadotPensia += value;
+                                    console.log('✅ קצבה לא מקיפה שכיר:', value);
+                                }
+                            }
+                        }
+                    }
+                    
+                    // חסכון לקצבה מקיפה- שכיר
+                    if (cellText === 'חסכון לקצבה מקיפה- שכיר') {
+                        const nextRow = rows[rowIndex + 1];
+                        if (nextRow) {
+                            const nextCells = nextRow.querySelectorAll('th, td');
+                            if (nextCells[cellIndex]) {
+                                const value = parseFloat(nextCells[cellIndex].textContent.trim().replace(/,/g, ''));
+                                if (!isNaN(value) && value > 0) {
+                                    result.havkadotPensia += value;
+                                    console.log('✅ קצבה מקיפה שכיר:', value);
+                                }
+                            }
+                        }
+                    }
+                });
+            });
+        });
+
+        console.log('=== תוצאות סופיות ===');
+        console.log('שכר מבוטח:', result.shacharMevutach);
+        console.log('שכר לא מבוטח:', result.shacharLoMevutach);
+        console.log('הפקדות פנסיה:', result.havkadotPensia);
+        console.log('ביטוח חיים:', result.bituachChayim);
+        console.log('חודשים:', result.months);
+
+        // בדיקה שנמצא לפחות חלק מהנתונים
+        if (result.shacharMevutach > 0 || result.shacharLoMevutach > 0 || result.havkadotPensia > 0) {
+            result.success = true;
+        } else {
+            result.error = 'לא נמצאו נתונים בקובץ ה-HTML. ייתכן שמבנה הקובץ שונה מהצפוי.';
+        }
+
+        return result;
+        
+    } catch (error) {
+        console.error('שגיאה בפרסור:', error);
+        return {
+            success: false,
+            error: 'שגיאה בפרסור הקובץ: ' + error.message
+        };
+    }
+}
+function findTableAfterH3(doc, title) {
+    const headers = doc.querySelectorAll('h3');
+    for (let header of headers) {
+        if (header.textContent.includes(title)) {
+            let nextElement = header.nextElementSibling;
+            while (nextElement) {
+                if (nextElement.tagName === 'DIV' && nextElement.classList.contains('table-block')) {
+                    return nextElement.querySelector('table');
+                }
+                if (nextElement.tagName === 'TABLE') {
+                    return nextElement;
+                }
+                if (nextElement.tagName === 'H1' || nextElement.tagName === 'H3') {
+                    break;
+                }
+                nextElement = nextElement.nextElementSibling;
+            }
+        }
+    }
+    return null;
+}
+function findTableByPartialTitle(doc, headerTag, keywords) {
+    const headers = doc.querySelectorAll(headerTag);
+    for (let header of headers) {
+        const headerText = header.textContent;
+        const matchesAny = keywords.some(keyword => headerText.includes(keyword));
+        
+        if (matchesAny) {
+            let nextElement = header.nextElementSibling;
+            while (nextElement) {
+                if (nextElement.tagName === 'DIV' && nextElement.classList.contains('table-block')) {
+                    return nextElement.querySelector('table');
+                }
+                if (nextElement.tagName === 'TABLE') {
+                    return nextElement;
+                }
+                if (nextElement.tagName === 'H1' || nextElement.tagName === 'H3') {
+                    break;
+                }
+                nextElement = nextElement.nextElementSibling;
+            }
+        }
+    }
+    return null;
+}
+
+function fillFormFields(data) {
+    if (data.shacharMevutach > 0) {
+        document.getElementById('shacharMevutach').value = Math.round(data.shacharMevutach);
+    }
+    if (data.shacharLoMevutach > 0) {
+        document.getElementById('shacharLoMevutach').value = Math.round(data.shacharLoMevutach);
+    }
+    if (data.months > 0) {
+        document.getElementById('months').value = data.months;
+    }
+    if (data.havkadotPensia > 0) {
+        document.getElementById('havkadotPensia').value = Math.round(data.havkadotPensia);
+    }
+    if (data.bituachChayim > 0) {
+        document.getElementById('bituachChayim').value = Math.round(data.bituachChayim);
+    }
+}
         // ============= תקרות לשנת 2025 - ניתן לעדכן כל שנה =============
         const TAKROT_2025 = {
             //תקרת הסכום לזיכוי בעד דמי ביטוח  ותגגמולים 45 א (ד)
@@ -332,7 +696,7 @@
             amitMutavShanati: 25566.72,
             
             // תקרת שכר מבוטח חודשי לזכאות לסעיף 47 (ניכוי)
-            shacharMevutachMaxLeSe47: 24250, //9700*2.5
+            shacharMevutachMaxLeSe47: 24250,
             
             // תקרת זיכוי מקסימלית לעמית מוטב
             zikuiMaxAmitMutav: 11640,
@@ -393,21 +757,16 @@ let sumMazke_PensiaMevutachet = 0;
 let zikuiPensiaMevutachet = 0;
 
 if (shacharMevutach > 0) {
- if (isAmitMutav) {
     takratPensiaMevutachet =     hachnasaMezakaShnati * 0.07; 
+
     sumMazke_PensiaMevutachet = Math.min(pensiaMevutachet, takratPensiaMevutachet);
     zikuiPensiaMevutachet = sumMazke_PensiaMevutachet * 0.35;
-} else {
-    takratPensiaMevutachet =     hachnasaMezakaShnati * 0.07;
-    sumMazke_PensiaMevutachet = Math.min((shacharMevutach+shacharLoMevutach), takratPensiaMevutachet);
-    zikuiPensiaMevutachet = sumMazke_PensiaMevutachet * 0.35;
- }
 }
+
 // 3. הכנסה לא מבוטחת - הפקדה פוטנציאלית
 let takratPensiaLoMevutachet = 0;
 let zikuiPotencialiLoMevutach = 0;
 let takratMaksimalit =0;
-let takratMaxLoMevutahet=0;
             
 
 if (shacharLoMevutach > 0) {
@@ -416,9 +775,8 @@ if (shacharLoMevutach > 0) {
         const takra5Percent = shacharLoMevutach * 0.05;
         const takraMax = TAKROT_2025.hachnasaMezaka * 2 * months; 
         const nikui = Math.min(TAKROT_2025.hachnasaMezaka * months, shacharMevutach);
-        const takratMaksimalit = (takraMax - nikui)*0.05;
+        const takratMaksimalit = Math.min(takraMax - nikui)*0.05;
         
-        takratMaxLoMevutahet=  takraMax - nikui ;   
         takratPensiaLoMevutachet = Math.min(takra5Percent, takratMaksimalit);
        zikuiPotencialiLoMevutach = takratPensiaLoMevutachet * 0.35;
     } else {
@@ -426,75 +784,54 @@ if (shacharLoMevutach > 0) {
         takratPensiaLoMevutachet = missingToAmitMutav; // כמה חסר להפוך לעמית מוטב
         
         // אם יהפוך לעמית מוטב, יוכל להפקיד:
-          const takra5Percent = shacharLoMevutach * 0.05;
+         const takra5Percent = shacharLoMevutach * 0.05;
         const takraMax = TAKROT_2025.hachnasaMezaka * 2 * months; 
         const nikui = Math.min(TAKROT_2025.hachnasaMezaka * months, shacharMevutach);
-         const takratMaksimalit = (takraMax - nikui)*0.05;
+        const takratMaksimalit = Math.min(takraMax - nikui)*0.05;
         
-        takratMaxLoMevutahet=  takraMax - nikui ;   
-        takratPensiaLoMevutachet = Math.min(takra5Percent, takratMaksimalit);
-       zikuiPotencialiLoMevutach = takratPensiaLoMevutachet * 0.35;
+         takratPensiaLoMevutachet = Math.min(takra5Percent, takratMaksimalit);
+        zikuiPotencialiLoMevutach = takratPensiaLoMevutachet * 0.35;
    }
 }
 
+// 4. סה"כ זיכוי על מה שכבר הפקיד
+const totalZikui45a = zikuiBituachChayim + zikuiPensiaMevutachet+zikuiPotencialiLoMevutach;
 
- // 4.זיכוי בגין הכנסה לא מעבודה
-            
-let shacharLoMeAvodaBefoal=shacharLoMeAvoda; 
-let takratshacharLoMeAvoda=0;
+ // 5.זיכוי בגין הכנסה לא מעבודה
+const takratshacharLoMeAvoda =  hachnasaMezaka2*months;         
+let shacharLoMeAvodaBefoal=shacharLoMeAvoda;            
 let zikuishacharLoMeAvoda = 0;
-let sumMazke_shacharLoMeAvoda = 0;
-            
+
 if (shacharLoMeAvoda > 0) {
-    takratshacharLoMeAvoda =  (hachnasaMezaka2*months-(Math.min(hachnasaMezaka*months,(shacharLoMevutach+shacharMevutach))));
-    sumMazke_shacharLoMeAvoda =Math.min(shacharLoMeAvodaBefoal,takratshacharLoMeAvoda);
-    zikuishacharLoMeAvoda = sumMazke_shacharLoMeAvoda * 0.35*0.05;
+    takratshacharLoMeAvoda =Math.min(shacharLoMeAvodaBefoal,takratshacharLoMeAvoda);
+    zikuishacharLoMeAvoda = takratshacharLoMeAvoda * 0.35*0.05;
 }
-// 5. סה"כ זיכוי על מה שכבר הפקיד
-const totalZikui45a = zikuiBituachChayim + zikuiPensiaMevutachet+zikuiPotencialiLoMevutach+zikuishacharLoMeAvoda;
+
 
 // 6. זיכוי פוטנציאלי נוסף
 //const zikuiPotenciali = zikuiPotencialiLoMevutach;
             
-       
-           // בדיקת זכאות לסעיף 47 (ניכוי)
+            // בדיקת זכאות לסעיף 47 (ניכוי)
             const zikaiLeSe47 = shacharMevutachChodshi <= TAKROT_2025.shacharMevutachMaxLeSe47;
-            const nikuiRateHachasaLoMeAvoda = (havkadotPensia > shacharLoMeAvoda * 0.12) ? 0.11 : 0.07;
-            const nikuiRateshacharLoMevutach = (havkadotPensia > shacharLoMevutach * 0.12) ? 0.11 : 0.07;
 
+            // חישוב זיכוי
+            const maxZikuiTakra = isAmitMutav ? TAKROT_2025.zikuiMaxAmitMutav : TAKROT_2025.zikuiMaxLoMutav;
+            const zikui5Percent = shacharLoMevutach * 0.05;
+            const zikuiFinal = Math.min(zikui5Percent, maxZikuiTakra);
+            const zikuiTaxBenefit = zikuiFinal * TAKROT_2025.zikuiRate;
 
             // חישוב ניכוי (אם זכאי)
-            const shacharMevutachMaxLeSe47 = TAKROT_2025.shacharMevutachMaxLeSe47;
-            const nikuiRateAmitMutav = age >= 50 ? TAKROT_2025.nikuiRateAge50 : TAKROT_2025.nikuiRateNormal;
-            
+            let nikuiFinal = 0;
             let nikuiTaxBenefit47 = 0;
-            let HachnasaAmitAzmai = 0;
-            let HachnasaNosefet = 0;
-            let HachasaHaevet = 0;
-            let maxTakratNikuiLoAmitMutav = 0;
-           
+            let nikuiTaxBenefit35 = 0;
             
             if (zikaiLeSe47) {
-                if (isAmitMutav) {
-                    // עמית מוטב - חישוב לפי סעיף 47
-                    HachasaHaevet = shacharLoMevutach + shacharMevutach;
-                    HachnasaAmitAzmai = Math.max(0, Math.min(hachnasaMezaka * months, HachasaHaevet) - shacharMevutach);
-                    HachnasaNosefet = Math.max(0, Math.min(
-                        Math.min(shacharLoMevutach, hachnasaMezaka * months),
-                        (Math.min(HachasaHaevet, shacharMevutachMaxLeSe47 * months) - Math.max(shacharMevutach, hachnasaMezaka * months))
-                    ));
-                    nikuiTaxBenefit47 = (HachnasaAmitAzmai * nikuiRateAmitMutav+HachnasaNosefet *nikuiRateshacharLoMevutach );
-                } else {
-//הניכוי לא יעלה על –
-//(1) 7% מהכנסתו המזכה שאיננה הכנסת עבודה; ואולם אם שילם סכום העולה על 12% מהכנסתו כאמור, יותר לו, בשל החלק העולה על 12% כאמור, ניכוי נוסף עד ל-4% מאותה הכנסה;
-//(2) הסכום הנמוך מבין אלה:
-//(א) 5% מהכנסתו המזכה שהיא הכנסת עבודה שאינה הכנסה מבוטחת;
-//(ב) 5% מהכנסתו החייבת שהיא הכנסת עבודה עד לסכום השווה לשתי פעמים וחצי הסכום האמור בפסקה (1) להגדרה "הכנסה מזכה" לשנה, בניכוי הכנסתו המבוטחת.
-                    maxTakratNikuiLoAmitMutav = Math.min(shacharLoMevutach, (shacharMevutachMaxLeSe47 * months - shacharMevutach)) * 0.05;
-                    nikuiTaxBenefit47 = Math.min(maxTakratNikuiLoAmitMutav, shacharLoMeAvoda*nikuiRateHachasaLoMeAvoda);
-                }
+                const nikuiRate = age >= 50 ? TAKROT_2025.nikuiRateAge50 : TAKROT_2025.nikuiRateNormal;
+                const nikuiPercent = shacharLoMevutach * nikuiRate;
+                nikuiFinal = Math.min(nikuiPercent, TAKROT_2025.nikuiMax);
+                nikuiTaxBenefit47 = nikuiFinal * 0.47;
+                nikuiTaxBenefit35 = nikuiFinal * 0.35;
             }
-
 displayResults({
     shacharMevutach,
     shacharLoMevutach,
@@ -507,6 +844,11 @@ displayResults({
     amitMutavYachasi,
     missingToAmitMutav,
     zikaiLeSe47,
+    zikuiFinal,
+    zikuiTaxBenefit,
+    nikuiFinal,
+    nikuiTaxBenefit47,
+    nikuiTaxBenefit35,
     bituachChayimShalem,
     zikuiBituachChayim,
     pensiaMevutachet,
@@ -515,28 +857,18 @@ displayResults({
     zikuiPensiaMevutachet,
     shacharLoMevutach,
     takratMaksimalit,
-    takratPensiaLoMevutachet,  // ✅ במקום pensiaLoMevutachet
-    zikuiPotencialiLoMevutach,  // ✅ חדש
+    takratPensiaLoMevutachet,
+    zikuiPotencialiLoMevutach,
     totalZikui45a,
     shacharLoMeAvoda,
     shacharLoMeAvodaBefoal,
     takratshacharLoMeAvoda,
-    sumMazke_shacharLoMeAvoda,
-    zikuishacharLoMeAvoda,
-         maxTakratNikuiLoAmitMutav,
-         nikuiTaxBenefit47,
-         HachnasaAmitAzmai,
-         HachnasaNosefet,
-         HachasaHaevet,
-         takratMaxLoMevutahet
-           
-   // zikuiPotenciali  // ✅ חדש
+    zikuishacharLoMeAvoda
 });
         }
 
         function displayResults(data) {
             const resultsDiv = document.getElementById('results');
-            const isAmitMutav = data.isAmitMutav; // ✅ הוסיפי שורה זו
             
             let html = '<div class="result-box highlight">';
             html += '<div class="result-title">📊 סיכום מצבך</div>';
@@ -558,7 +890,7 @@ displayResults({
             </div>`;
             html += '</div>';
          html += `<div class="result-item">
-                <span class="result-label">bfbxvהכנסה לא מעבודה (שנתי)</span>
+                <span class="result-label">הכנסה לא מעבודה (שנתי)</span>
                 <span class="result-value">${formatNumber(data.shacharLoMeAvoda)} ₪</span>
             </div>`;    
 
@@ -643,18 +975,7 @@ if (data.shacharMevutach > 0) {
 }
 
 // חלק 3: פנסיה - הכנסה לא מבוטחת
-// הודעה ליחיד שאינו עמית מוטב
-if (data.shacharLoMevutach > 0 && !isAmitMutav) {
-    html += '<div class="warning-box" style="margin-top: 20px;">';
-    html += '<div class="warning-title">🔒 זיכוי בגין הכנסה לא מבוטחת - לא זמין</div>';
-    html += '<div class="warning-text">';
-    html += '<strong>הזיכוי הזה זמין רק לעמית מוטב!</strong><br><br>';
-    html += `כדי לקבל גישה לזיכוי זה, עליך להפקיד עוד <strong>${formatNumber(data.missingToAmitMutav)} ₪</strong> לפנסיה.<br>`;
-    html += `אז תוכל לקבל זיכוי ממס של עד <strong>${formatNumber(data.zikuiPotencialiLoMevutach)} ₪</strong>!`;
-    html += '</div>';
-    html += '</div>';
-}            
-if (data.shacharLoMevutach > 0 && isAmitMutav) {
+if (data.shacharLoMevutach > 0) {
     html += '<div class="result-title" style="font-size: 16px; margin-top: 20px;">📋 זיכוי בגין הכנסת עבודה לא מבוטחת - סעיף 45א(ה)(2)(ב)</div>';
     
     if (!data.isAmitMutav) {
@@ -675,10 +996,6 @@ if (data.shacharLoMevutach > 0 && isAmitMutav) {
         <span class="result-value">${formatNumber(data.shacharLoMevutach)} ₪</span>
     </div>`;
     html += `<div class="result-item">
-        <span class="result-label">תקרת הכנסה לא מבוטחת</span>
-        <span class="result-value">${formatNumber(data.takratMaxLoMevutahet)} ₪</span>
-    </div>`;
-    html += `<div class="result-item">
         <span class="result-label">תקרת זיכוי: 5% מהכנסה לא מבוטחת (מוגבל בתקרה)</span>
         <span class="result-value">${formatNumber(data.takratPensiaLoMevutachet)} ₪</span>
     </div>`;
@@ -694,7 +1011,7 @@ if (data.shacharLoMevutach > 0 && isAmitMutav) {
     </div>`;      
 }
             // חלק 5 זיכוי בגין שכר לא מעבודה 
-if (data.shacharLoMeAvodah > 0) {
+if (data.shacharLoMeAvoda > 0) {
     html += '<div class="result-title" style="font-size: 16px; margin-top: 20px;">📋זיכוי בגין הכנסה לא מעבודה 45א</div>';
     html += `<div class="result-item">
         <span class="result-label">הכנסה לא מעבודה </span>
@@ -702,7 +1019,7 @@ if (data.shacharLoMeAvodah > 0) {
     </div>`;
     html += `<div class="result-item">
         <span class="result-label">תקרת שכר לא מעבודה סעיף 47א2 </span>
-        <span class="result-value">${formatNumber(data.sumMazke_shacharLoMeAvoda)} ₪</span>
+        <span class="result-value">${formatNumber(data.takratshacharLoMeAvoda)} ₪</span>
     </div>`;
       html += `<div class="result-item">
         <span class="result-label">שיעור זיכוי</span>
@@ -727,38 +1044,20 @@ html += '</div>';
                 <span class="result-label">שכר מבוטח חודשי שלך</span>
                 <span class="result-value">${formatNumber(data.shacharMevutachChodshi)} ₪</span>
             </div>`;
+            html += `<div class="result-item">
+                <span class="result-label">הכנסה מזכה לפי סעיף 47 (א)(1)</span>
+                <span class="result-value">${formatNumber(TAKROT_2025.hachnasaMezaka)} ₪</span>
+            </div>`;
+            html += `<div class="result-item">
+                <span class="result-label">סכום השווה לשתי פעמים וחצי הסכום האמור בפסקה (1) להגדרה "הכנסה מזכה" לשנה -תקרת שכר לסעיף 47</span>
+                <span class="result-value">${formatNumber(TAKROT_2025.shacharMevutachMaxLeSe47)} ₪</span>
+            </div>`;
             
             if (data.zikaiLeSe47) {
                 html += `<div class="result-item">
                     <span class="result-label">זכאות לניכוי</span>
                     <span class="result-value success">✅ כן</span>
                 </div>`;
-
-                 html += `<div class="result-item">
-                <span class="result-label">הכנסה חייבת </span>
-                <span class="result-value">${formatNumber(data.HachasaHaevet)} ₪</span>
-            </div>`;
-             html += `<div class="result-item">
-                <span class="result-label">  הכנסה לעמית עצמאי (עמית מוטב בלבד) </span>
-                <span class="result-value">${formatNumber(data.HachnasaAmitAzmai)} ₪</span>
-            </div>`;
-             html += `<div class="result-item">
-                <span class="result-label"> הכנסה נוספת(לעמית מוטב בלבד) </span>
-                <span class="result-value">${formatNumber(data.HachnasaNosefet)} ₪</span>
-            </div>`;
-
-
-               html += `<div class="result-item">
-                <span class="result-label">סה"כ ניכוי לפי סעיף 47</span>
-                <span class="result-value">${formatNumber(data.nikuiTaxBenefit47)} ₪</span>
-            </div>`;
-
-
-            
-         
-           
-
-              
                 html += '<div class="info-box">';
                 html += '<div class="info-box-title">💡 מה זה אומר?</div>';
                 html += '<div class="info-box-text">את/ה זכאי/ת גם לניכוי וגם לזיכוי! זה אומר שאת/ה יכול/ה לקבל הטבות מס גם על ניכוי (שמפחית את ההכנסה החייבת במס) וגם על זיכוי (הנחה ישירה במס).</div>';
@@ -770,7 +1069,7 @@ html += '</div>';
                 </div>`;
                 html += '<div class="warning-box">';
                 html += '<div class="warning-title">⚠️ שים/י לב</div>';
-                html += `<div class="warning-text">השכר המבוטח שלך עובר את התקרה (${formatNumber(TAKROT_2025.shacharMevutachMaxLeSe47)} ₪), לכן את/ה זכאי/ת <strong>רק לזיכוי</strong>ולא לניכוי.</div>`;
+                html += `<div class="warning-text">השכר המבוטח שלך עובר את התקרה (${formatNumber(TAKROT_2025.shacharMevutachMaxLeSe47)} ₪), לכן את/ה זכאי/ת <strong>רק לזיכוי</strong> ולא לניכוי.</div>`;
                 html += '</div>';
             }
             html += '</div>';
@@ -811,14 +1110,6 @@ html += '</div>';
                 html += '</div>';
                 html += '</div>';
             }
-
-         
-           // const totalHafkada = (!data.isAmitMutav ? data.missingToAmitMutav : 0) + data.zikuiFinal;
-           // html += `<div class="big-number" style="background: linear-gradient(135deg, #28a74515 0%, #20c99715 100%); color: #28a745;">
-            //    💰 סה"כ הטבת מס: ${formatNumber(data.zikuiTaxBenefit)} ₪
-           // </div>`;
-            
-          //  html += '</div>';
 
             // הסברים נוספים
             html += '<div class="result-box">';
@@ -868,6 +1159,8 @@ html += 'לדוגמה:<br>';
 html += '• 12 חודשים → ' + formatNumber(TAKROT_2025.amitMutavShanati) + ' ₪<br>';
 html += '• 9 חודשים → ' + formatNumber((TAKROT_2025.amitMutavShanati / 12) * 9) + ' ₪<br>';
 html += '• 6 חודשים → ' + formatNumber((TAKROT_2025.amitMutavShanati / 12) * 6) + ' ₪<br><br>';
+html += '</div>';
+html += '</div>';
 
             if (data.age >= 50) {
                 html += '<div class="explanation" style="background: #f3e5f5; border-color: #9c27b0; margin-top: 15px;">';
@@ -881,16 +1174,14 @@ html += '• 6 חודשים → ' + formatNumber((TAKROT_2025.amitMutavShanati /
                 html += '</div>';
             }
 
-            html += '</div>';
-
             // אזור עדכון תקרות
             html += '<div class="result-box" style="background: #f5f5f5; border: 2px dashed #999;">';
             html += '<div class="result-title" style="color: #666;">⚙️ תקרות שנת 2025 (לעדכון)</div>';
             html += '<div style="font-size: 13px; color: #666; line-height: 1.8;">';
-         html += '<strong>📌 סף עמית מוטב (סעיף ( 47(א)(7)):</strong><br>';
+         html += '<strong>📌 סף עמית מוטב (סעיף 47(א)(7)):</strong><br>';
 html += '&nbsp;&nbsp;&nbsp;' + formatNumber(TAKROT_2025.amitMutavShanati) + ' ₪/שנה (16% מהשכר הממוצע במשק)<br>';
 html += '&nbsp;&nbsp;&nbsp;מקור: השכר הממוצע: 13,316 ₪ × 12 × 16%<br><br>';
-            html += '📌 <strong>הכנסה מזכה לפי סעיף 47 (א)(1)</strong> '+formatNumber(TAKROT_2025. hachnasaMezaka) + ' ₪/חודש<br>';
+            html += '📌 <strong>הכנסה מזכה לפי סעיף 47 (א)(1)</strong> '+formatNumber(TAKROT_2025.hachnasaMezaka) + ' ₪/חודש<br>';
             html += '📌 <strong>סכום השווה לשתי פעמים וחצי הסכום האמור בפסקה (1) להגדרה "הכנסה מזכה" לשנה -תקרת הכנסה לניכוי לפי סעיף 47:</strong> ' + formatNumber(TAKROT_2025.shacharMevutachMaxLeSe47) + ' ₪/חודש<br>';
             html += '📌 <strong>לענין עמית מוטב שלא היתה לו בשנת המס הכנסה מבוטחת – 5% מהכנסתו החייבת עד לסכום השווה לפעמיים הסכום האמור בפסקה (1) להגדרה "הכנסה מזכה" שבסעיף 47(א)(1) לשנה-תקרת זיכוי עמית מוטב:</strong> ' + formatNumber(TAKROT_2025.zikuiMaxAmitMutav) + ' ₪<br>';
             html += '📌 <strong>תקרת זיכוי לא עמית מוטב:</strong> ' + formatNumber(TAKROT_2025.zikuiMaxLoMutav) + ' ₪<br>';
@@ -934,4 +1225,3 @@ html += '&nbsp;&nbsp;&nbsp;מקור: השכר הממוצע: 13,316 ₪ × 12 × 
     </script>
 </body>
 </html>
-            
