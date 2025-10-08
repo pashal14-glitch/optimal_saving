@@ -404,25 +404,45 @@ document.getElementById('htmlFileInput').addEventListener('change', async functi
         console.log('=== התחלת ניתוח הקובץ ===');
        
 
-  // 1. חישוב מספר חודשים מטבלת "יחידות מס"
-        const yehidotMasTable = findTableByPartialTitle(doc, 'h1', ['יחידות מס']);
+// 1. חישוב מספר חודשים מטבלת "יחידות מס"
+const yehidotMasTable = findTableByPartialTitle(doc, 'h1', ['יחידות מס']);
+
+if (yehidotMasTable) {
+    console.log('✅ נמצאה טבלת יחידות מס');
+    
+    const allRows = yehidotMasTable.querySelectorAll('tr');
+    
+    // קח את השורה השנייה (אינדקס 1) - שם יחידות המס!
+    if (allRows.length >= 2) {
+        const dataRow = allRows[1]; // שורה 1 במקום שורה 0
+        const cells = dataRow.querySelectorAll('td, th');
+        let monthCount = 0;
         
-        if (yehidotMasTable) {
-            const monthCells = yehidotMasTable.querySelectorAll('tr:first-child td');
-            let monthCount = 0;
-            monthCells.forEach(cell => {
-                const value = parseFloat(cell.textContent.trim());
-                if (!isNaN(value) && value > 0 && value <= 31) {
-                    monthCount++;
-                }
-            });
-            if (monthCount > 0 && monthCount <= 12) {
-                result.months = monthCount;
-                console.log('✅ מספר חודשים:', monthCount);
+        console.log('=== ספירת חודשים מהשורה השנייה ===');
+        
+        for (let i = 0; i < cells.length; i++) {
+            const cellText = cells[i].textContent.trim();
+            const value = parseFloat(cellText);
+            
+            console.log(`בודק תא ${i}: "${cellText}" → מספר: ${value}`);
+            
+            if (!isNaN(value) && value > 0 && value <= 31) {
+                monthCount++;
+                console.log(`  ✓ זה יחידת מס! סה"כ: ${monthCount}`);
+            } else {
+                console.log(`  ✗ לא יחידת מס - עוצר`);
+                break;
             }
         }
-
-
+        
+        if (monthCount > 0 && monthCount <= 12) {
+            result.months = monthCount;
+            console.log('✅ מספר חודשים סופי:', monthCount);
+        }
+    }
+} else {
+    console.log('❌ לא נמצאה טבלת יחידות מס');
+}
 
 
 // 2. חילוץ שכר מבוטח - רק מטבלת "נתוני עזר לחישוב ההטבות"
@@ -449,6 +469,20 @@ if (natuneyEzerTable) {
                         if (!isNaN(value) && value > 0) {
                             result.shacharLoMevutach = value;
                             console.log('✅ שכר לא מבוטח:', value);
+                        }
+                    }
+                }
+            }
+             // שכר לא מעבודה
+            if (cellText.includes('הכנסה מזכה') && cellText.includes('מבוטחת לא מעבודה')) {
+                const nextRow = rows[rowIndex + 1];
+                if (nextRow) {
+                    const nextCells = nextRow.querySelectorAll('th, td');
+                    if (nextCells[cellIndex]) {
+                        const value = parseFloat(nextCells[cellIndex].textContent.trim().replace(/,/g, ''));
+                        if (!isNaN(value) && value > 0) {
+                            result.shacharLoMeAvoda = value;
+                            console.log('הכנסה לא מעבודה:', value);
                         }
                     }
                 }
@@ -601,6 +635,7 @@ if (natuneyEzerTable) {
         console.log('הפקדות פנסיה:', result.havkadotPensia);
         console.log('ביטוח חיים:', result.bituachChayim);
         console.log('חודשים:', result.months);
+        console.log('חודשים:', result.shacharLoMeAvoda);
 
         // בדיקה שנמצא לפחות חלק מהנתונים
         if (result.shacharMevutach > 0 || result.shacharLoMevutach > 0 || result.havkadotPensia > 0) {
@@ -680,6 +715,9 @@ function fillFormFields(data) {
     }
     if (data.bituachChayim > 0) {
         document.getElementById('bituachChayim').value = Math.round(data.bituachChayim);
+    }
+    if (data.shacharLoMeAvoda > 0) {
+        document.getElementById('shacharLoMeAvoda').value = Math.round(data.shacharLoMeAvoda);
     }
 }
         // ============= תקרות לשנת 2025 - ניתן לעדכן כל שנה =============
