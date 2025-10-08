@@ -813,7 +813,7 @@ if (shacharLoMevutach > 0) {
         const takra5Percent = shacharLoMevutach * 0.05;
         const takraMax = TAKROT_2025.hachnasaMezaka * 2 * months; 
         const nikui = Math.min(TAKROT_2025.hachnasaMezaka * months, shacharMevutach);
-        const takratMaksimalit = Math.min(takraMax - nikui)*0.05;
+        const takratMaksimalit = (takraMax - nikui)*0.05;
         
         takratPensiaLoMevutachet = Math.min(takra5Percent, takratMaksimalit);
        zikuiPotencialiLoMevutach = takratPensiaLoMevutachet * 0.35;
