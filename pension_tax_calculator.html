@@ -803,6 +803,7 @@ if (shacharMevutach > 0) {
 
 // 3. הכנסה לא מבוטחת - הפקדה פוטנציאלית
 let takratPensiaLoMevutachet = 0;
+let takratPensiaLoMevutachetBasis = 0;
 let zikuiPotencialiLoMevutach = 0;
 let takratMaksimalit =0;
             
@@ -817,6 +818,7 @@ if (shacharLoMevutach > 0) {
         
         takratPensiaLoMevutachet = Math.min(takra5Percent, takratMaksimalit);
        zikuiPotencialiLoMevutach = takratPensiaLoMevutachet * 0.35;
+       takratPensiaLoMevutachetBasis =takratPensiaLoMevutachet/0.05
     } else {
         // לא עמית מוטב - חשב כמה חסר + תקרה אם יהפוך
         takratPensiaLoMevutachet = missingToAmitMutav; // כמה חסר להפוך לעמית מוטב
@@ -829,6 +831,7 @@ if (shacharLoMevutach > 0) {
         
          takratPensiaLoMevutachet = Math.min(takra5Percent, takratMaksimalit);
         zikuiPotencialiLoMevutach = takratPensiaLoMevutachet * 0.35;
+        takratPensiaLoMevutachetBasis =takratPensiaLoMevutachet/0.05
    }
 }
 
@@ -901,7 +904,8 @@ displayResults({
     shacharLoMeAvoda,
     shacharLoMeAvodaBefoal,
     takratshacharLoMeAvoda,
-    zikuishacharLoMeAvoda
+    zikuishacharLoMeAvoda,
+    takratPensiaLoMevutachetBasis
 });
         }
 
@@ -1032,6 +1036,10 @@ if (data.shacharLoMevutach > 0) {
     html += `<div class="result-item">
         <span class="result-label">הכנסה לא מבוטחת</span>
         <span class="result-value">${formatNumber(data.shacharLoMevutach)} ₪</span>
+    </div>`;
+    html += `<div class="result-item">
+        <span class="result-label">תקרת הכנסה לא מבוטחת</span>
+        <span class="result-value">${formatNumber(data.takratPensiaLoMevutachetBasis)} ₪</span>
     </div>`;
     html += `<div class="result-item">
         <span class="result-label">תקרת זיכוי: 5% מהכנסה לא מבוטחת (מוגבל בתקרה)</span>
