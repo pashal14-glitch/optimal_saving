@@ -816,7 +816,7 @@ if (shacharLoMevutach > 0) {
         const nikui = Math.min(TAKROT_2025.hachnasaMezaka * months, shacharMevutach);
         const takratMaksimalit = (takraMax - nikui)*0.05;
         
-        takratPensiaLoMevutachet = Math.min(takra5Percent, takratMaksimalit);
+        takratPensiaLoMevutachet = Math.max(0,Math.min(takra5Percent, takratMaksimalit)-havkadotBituachChayim);
        zikuiPotencialiLoMevutach = takratPensiaLoMevutachet * 0.35;
        takratPensiaLoMevutachetBasis =takratPensiaLoMevutachet/0.05
     } else {
@@ -829,7 +829,7 @@ if (shacharLoMevutach > 0) {
         const nikui = Math.min(TAKROT_2025.hachnasaMezaka * months, shacharMevutach);
         const takratMaksimalit = (takraMax - nikui)*0.05;
         
-         takratPensiaLoMevutachet = Math.min(takra5Percent, takratMaksimalit);
+        takratPensiaLoMevutachet = Math.max(0,Math.min(takra5Percent, takratMaksimalit)-havkadotBituachChayim);
         zikuiPotencialiLoMevutach = takratPensiaLoMevutachet * 0.35;
         takratPensiaLoMevutachetBasis =takratPensiaLoMevutachet/0.05
    }
