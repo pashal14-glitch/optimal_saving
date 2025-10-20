@@ -912,27 +912,82 @@ if (shacharLoMeAvoda > 0) {
 //6.חישוב ניכוי פוטנציאלי נוסף
 
             
-            // בדיקת זכאות לסעיף 47 (ניכוי)
-            const zikaiLeSe47 = shacharMevutachChodshi <= TAKROT_2025.shacharMevutachMaxLeSe47;
+           // ========== חישוב ניכוי סעיף 47 ==========
 
-            // חישוב עובד
-            const maxZikuiTakra = isAmitMutav ? TAKROT_2025.zikuiMaxAmitMutav : TAKROT_2025.zikuiMaxLoMutav;
-            const zikui5Percent = shacharLoMevutach * 0.05;
-            const zikuiFinal = Math.min(zikui5Percent, maxZikuiTakra);
-            const zikuiTaxBenefit = zikuiFinal * TAKROT_2025.zikuiRate;
+// בדיקת זכאות בסיסית לסעיף 47
+const zikaiLeSe47 = shacharMevutachChodshi <= TAKROT_2025.shacharMevutachMaxLeSe47;
 
-            // חישוב ניכוי (אם זכאי)
-            let nikuiFinal = 0;
-            let nikuiTaxBenefit47 = 0;
-            let nikuiTaxBenefit35 = 0;
-            
-            if (zikaiLeSe47) {
-                const nikuiRate = age >= 50 ? TAKROT_2025.nikuiRateAge50 : TAKROT_2025.nikuiRateNormal;
-                const nikuiPercent = shacharLoMevutach * nikuiRate;
-                nikuiFinal = Math.min(nikuiPercent, TAKROT_2025.nikuiMax);
-                nikuiTaxBenefit47 = nikuiFinal * 0.47;
-                nikuiTaxBenefit35 = nikuiFinal * 0.35;
-            }
+let nikuiLoMeAvoda = 0;
+let nikuiAmitLoMutav = 0;
+let nikuiAmitMutav = 0;
+let nikuiTotal = 0;
+
+if (zikaiLeSe47) {
+    // === שלב 1: ניכוי בגין הכנסה לא מעבודה (סעיף 47ב(1)) ===
+    if (shacharLoMeAvoda > 0) {
+        const hachnasaMezakaLoMeAvoda = Math.min(shacharLoMeAvoda, hachnasaMezaka2 * months);
+        nikuiLoMeAvoda = hachnasaMezakaLoMeAvoda * 0.07;
+    }
+    
+    // === שלב 2: חישוב "הכנסה לעמית עצמאי" ===
+    // סך כל ההכנסה החייבת עד 116,400 ₪ בניכוי הכנסה מבוטחת
+    const haknasaLeAmitAtzmai = Math.max(0, 
+        Math.min(shacharMevutach + shacharLoMevutach, TAKROT_2025.haknasaMezakeSe47) - shacharMevutach
+    );
+    
+    // === שלב 3: חישוב "הכנסה נוספת" (סעיף 47א(5)) ===
+    // הנמוך מבין:
+    // (1) הכנסה לא מבוטחת עד 116,400 ₪
+    const option1 = Math.min(shacharLoMevutach, TAKROT_2025.haknasaMezakeSe47);
+    
+    // (2) סך הכנסה עד 291,000 ₪ בניכוי הכנסה מבוטחת או 116,400 ₪ (הגבוה)
+    const tikra2point5 = TAKROT_2025.haknasaMezakeSe47 * 2.5;
+    const nikhui = Math.max(shacharMevutach, TAKROT_2025.haknasaMezakeSe47);
+    const option2 = Math.max(0, 
+        Math.min(shacharMevutach + shacharLoMevutach, tikra2point5) - nikhui
+    );
+    
+    const haknasaNosefet = Math.min(option1, option2);
+    
+    // === שלב 4: חישוב ניכוי לפי סטטוס עמית מוטב ===
+    
+    if (!isAmitMutav) {
+        // ========== לא עמית מוטב - סעיף 47ב(2) ==========
+        // הסכום הנמוך מבין:
+        // (א) 5% מהכנסה לא מבוטחת
+        const nikui_a = shacharLoMevutach * 0.05;
+        
+        // (ב) 5% מההכנסה החייבת עד 291,000 בניכוי הכנסה מבוטחת
+        const nikui_b = Math.max(0, 
+            Math.min(shacharMevutach + shacharLoMevutach, tikra2point5) - shacharMevutach
+        ) * 0.05;
+        
+        nikuiAmitLoMutav = Math.min(nikui_a, nikui_b);
+        
+    } else {
+        // ========== עמית מוטב - סעיף 47ב1 ==========
+        
+        // (1) 11% מההכנסה לעמית עצמאי
+        const nikuiRate1 = age >= 50 ? TAKROT_2025.nikuiRateAge50 : TAKROT_2025.nikuiRateNormal;
+        const nikui_ezmai = haknasaLeAmitAtzmai * nikuiRate1;
+        
+        // (2) 7% מההכנסה הנוספת (רק על החלק שלא קיבל ניכוי לפי פסקה 1)
+        const nikui_nosefet = haknasaNosefet * 0.07;
+        
+        nikuiAmitMutav = nikui_ezmai + nikui_nosefet;
+    }
+    
+    // === שלב 5: סיכום כולל ===
+    nikuiTotal = nikuiLoMeAvoda + (isAmitMutav ? nikuiAmitMutav : nikuiAmitLoMutav);
+    
+    // הגבלה לתקרה המקסימלית
+    nikuiTotal = Math.min(nikuiTotal, TAKROT_2025.nikuiMax);
+}
+
+// חישוב הטבת המס בפועל
+const nikuiTaxBenefit47 = nikuiTotal * 0.47;
+const nikuiTaxBenefit35 = nikuiTotal * 0.35;
+}
 displayResults({
     shacharMevutach,
     shacharLoMevutach,
@@ -965,7 +1020,15 @@ displayResults({
     shacharLoMeAvodaBefoal,
     takratshacharLoMeAvoda,
     zikuishacharLoMeAvoda,
-    takratPensiaLoMevutachetBasis
+    takratPensiaLoMevutachetBasis,
+    nikuiLoMeAvoda,
+    nikuiAmitLoMutav,
+    nikuiAmitMutav,
+    haknasaLeAmitAtzmai,
+    haknasaNosefet,
+    nikuiTotal,
+    nikuiTaxBenefit47,
+    nikuiTaxBenefit35
 });
         }
 
