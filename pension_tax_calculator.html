@@ -610,7 +610,49 @@ if (natuneyEzerTable) {
                             }
                         }
                     }
-                    
+//הפרשה לקצבה מקיפה	
+                    if (cellText === 'הפרשה לקצבה מקיפה') {
+                        const nextRow = rows[rowIndex + 1];
+                        if (nextRow) {
+                            const nextCells = nextRow.querySelectorAll('th, td');
+                            if (nextCells[cellIndex]) {
+                                const value = parseFloat(nextCells[cellIndex].textContent.trim().replace(/,/g, ''));
+                                if (!isNaN(value) && value > 0) {
+                                    result.havkadotPensia += value;
+                         console.log('✅הפרשה לקצבה מקיפה', value);                                }
+                            }
+                        }
+                    }
+//הפרשה לקצבה לא מקיפה	
+                    if (cellText === 'הפרשה לקצבה לא מקיפה') {
+                        const nextRow = rows[rowIndex + 1];
+                        if (nextRow) {
+                            const nextCells = nextRow.querySelectorAll('th, td');
+                            if (nextCells[cellIndex]) {
+                                const value = parseFloat(nextCells[cellIndex].textContent.trim().replace(/,/g, ''));
+                                if (!isNaN(value) && value > 0) {
+                                    result.havkadotPensia += value;
+                                   console.log('✅הפרשה לקצבה לא מקיפה', value);   
+                                }
+                            }
+                        }
+                    }
+
+//הפרשה לפנסיה הוני	
+                    if (cellText === 'הפרשה לפנסיה הוני') {
+                        const nextRow = rows[rowIndex + 1];
+                        if (nextRow) {
+                            const nextCells = nextRow.querySelectorAll('th, td');
+                            if (nextCells[cellIndex]) {
+                                const value = parseFloat(nextCells[cellIndex].textContent.trim().replace(/,/g, ''));
+                                if (!isNaN(value) && value > 0) {
+                                    result.havkadotPensia += value;
+                                    console.log('✅ הפרשה לפנסיה הוני:', value);
+                                }
+                            }
+                        }
+                    }
+
                     // חסכון לקצבה מקיפה- שכיר
                     if (cellText === 'חסכון לקצבה מקיפה- שכיר') {
                         const nextRow = rows[rowIndex + 1];
@@ -625,6 +667,20 @@ if (natuneyEzerTable) {
                             }
                         }
                     }
+//הכנסה לא מעבודה - 47	
+                    if (cellText === 'הכנסה לא מעבודה - 47') {
+                        const nextRow = rows[rowIndex + 1];
+                        if (nextRow) {
+                            const nextCells = nextRow.querySelectorAll('th, td');
+                            if (nextCells[cellIndex]) {
+                                const value = parseFloat(nextCells[cellIndex].textContent.trim().replace(/,/g, ''));
+                                if (!isNaN(value) && value > 0) {
+                                    result.shacharLoMeAvoda += value;
+                                    console.log('✅ הכנסה לא מעבודה - 47	:', value);
+                                }
+                            }
+                        }
+                    }
                 });
             });
         });
@@ -632,6 +688,7 @@ if (natuneyEzerTable) {
         console.log('=== תוצאות סופיות ===');
         console.log('שכר מבוטח:', result.shacharMevutach);
         console.log('שכר לא מבוטח:', result.shacharLoMevutach);
+        console.log('שכר לא מבוטח:', result.shacharLoMeAvoda);
         console.log('הפקדות פנסיה:', result.havkadotPensia);
         console.log('ביטוח חיים:', result.bituachChayim);
         console.log('חודשים:', result.months);
@@ -701,6 +758,8 @@ function findTableByPartialTitle(doc, headerTag, keywords) {
 }
 
 function fillFormFields(data) {
+    console.log('=== מילוי שדות בטופס ===');
+    console.log('data.havkadotPensia:', data.havkadotPensia);
     if (data.shacharMevutach > 0) {
         document.getElementById('shacharMevutach').value = Math.round(data.shacharMevutach);
     }
@@ -763,6 +822,7 @@ function fillFormFields(data) {
         }
 
         function calculate() {
+
             // קריאת ערכים
             const shacharMevutach = parseFloat(document.getElementById('shacharMevutach').value) || 0;
             const shacharLoMeAvoda = parseFloat(document.getElementById('shacharLoMeAvoda').value) || 0;
@@ -816,7 +876,7 @@ if (shacharLoMevutach > 0) {
         const nikui = Math.min(TAKROT_2025.hachnasaMezaka * months, shacharMevutach);
         const takratMaksimalit = (takraMax - nikui)*0.05;
         
-        takratPensiaLoMevutachet = Math.max(0,Math.min(takra5Percent, takratMaksimalit)-havkadotBituachChayim);
+       takratPensiaLoMevutachet = Math.max(0,Math.min(takra5Percent, takratMaksimalit)-havkadotBituachChayim);
        zikuiPotencialiLoMevutach = takratPensiaLoMevutachet * 0.35;
        takratPensiaLoMevutachetBasis =takratPensiaLoMevutachet/0.05
     } else {
@@ -829,8 +889,8 @@ if (shacharLoMevutach > 0) {
         const nikui = Math.min(TAKROT_2025.hachnasaMezaka * months, shacharMevutach);
         const takratMaksimalit = (takraMax - nikui)*0.05;
         
-        takratPensiaLoMevutachet = Math.max(0,Math.min(takra5Percent, takratMaksimalit)-havkadotBituachChayim);
-        zikuiPotencialiLoMevutach = takratPensiaLoMevutachet * 0.35;
+         takratPensiaLoMevutachet = Math.max(0,Math.min(takra5Percent, takratMaksimalit)-havkadotBituachChayim);
+        zikuiPotencialiLoMevutach = Math.max(0,takratPensiaLoMevutachet*0.35);
         takratPensiaLoMevutachetBasis =takratPensiaLoMevutachet/0.05
    }
 }
@@ -849,13 +909,13 @@ if (shacharLoMeAvoda > 0) {
 }
 
 
-// 6. זיכוי פוטנציאלי נוסף
-//const zikuiPotenciali = zikuiPotencialiLoMevutach;
+//6.חישוב ניכוי פוטנציאלי נוסף
+
             
             // בדיקת זכאות לסעיף 47 (ניכוי)
             const zikaiLeSe47 = shacharMevutachChodshi <= TAKROT_2025.shacharMevutachMaxLeSe47;
 
-            // חישוב זיכוי
+            // חישוב עובד
             const maxZikuiTakra = isAmitMutav ? TAKROT_2025.zikuiMaxAmitMutav : TAKROT_2025.zikuiMaxLoMutav;
             const zikui5Percent = shacharLoMevutach * 0.05;
             const zikuiFinal = Math.min(zikui5Percent, maxZikuiTakra);
