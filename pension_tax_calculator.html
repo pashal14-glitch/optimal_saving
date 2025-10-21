@@ -979,7 +979,7 @@ if (zikaiLeSe47) {
         // (2) 7% מההכנסה הנוספת (רק על החלק שלא קיבל ניכוי לפי פסקה 1)
         const nikui_nosefet = haknasaNosefet * 0.07;
         const zakaiLeNikuiNosaf = havkadotPensia/haknasaNosefet>0.12;
-        const yetraLeNikui=havkadotPensia-haknasaNosefet*0.12;
+        const yetraLeNikui=Math.min(havkadotPensia-haknasaNosefet*0.12,havkadotPensia-amitMutavYachasi);
         if (zakaiLeNikuiNosaf){
         nikui_nosaf_Mutav= yetraLeNikui*0.04;   
         }
