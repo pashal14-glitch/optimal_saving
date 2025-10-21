@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
@@ -912,27 +913,82 @@ if (shacharLoMeAvoda > 0) {
 //6.חישוב ניכוי פוטנציאלי נוסף
 
             
-            // בדיקת זכאות לסעיף 47 (ניכוי)
-            const zikaiLeSe47 = shacharMevutachChodshi <= TAKROT_2025.shacharMevutachMaxLeSe47;
+           // ========== חישוב ניכוי סעיף 47 ==========
 
-            // חישוב עובד
-            const maxZikuiTakra = isAmitMutav ? TAKROT_2025.zikuiMaxAmitMutav : TAKROT_2025.zikuiMaxLoMutav;
-            const zikui5Percent = shacharLoMevutach * 0.05;
-            const zikuiFinal = Math.min(zikui5Percent, maxZikuiTakra);
-            const zikuiTaxBenefit = zikuiFinal * TAKROT_2025.zikuiRate;
+// בדיקת זכאות בסיסית לסעיף 47
+const zikaiLeSe47 = shacharMevutachChodshi <= TAKROT_2025.shacharMevutachMaxLeSe47;
 
-            // חישוב ניכוי (אם זכאי)
-            let nikuiFinal = 0;
-            let nikuiTaxBenefit47 = 0;
-            let nikuiTaxBenefit35 = 0;
-            
-            if (zikaiLeSe47) {
-                const nikuiRate = age >= 50 ? TAKROT_2025.nikuiRateAge50 : TAKROT_2025.nikuiRateNormal;
-                const nikuiPercent = shacharLoMevutach * nikuiRate;
-                nikuiFinal = Math.min(nikuiPercent, TAKROT_2025.nikuiMax);
-                nikuiTaxBenefit47 = nikuiFinal * 0.47;
-                nikuiTaxBenefit35 = nikuiFinal * 0.35;
-            }
+let nikuiLoMeAvoda = 0;
+let nikuiAmitLoMutav = 0;
+let nikuiAmitMutav = 0;
+let nikuiTotal = 0;
+
+if (zikaiLeSe47) {
+    // === שלב 1: ניכוי בגין הכנסה לא מעבודה (סעיף 47ב(1)) ===
+    if (shacharLoMeAvoda > 0) {
+        const hachnasaMezakaLoMeAvoda = Math.min(shacharLoMeAvoda, hachnasaMezaka2 * months);
+        nikuiLoMeAvoda = hachnasaMezakaLoMeAvoda * 0.07;
+    }
+    
+    // === שלב 2: חישוב "הכנסה לעמית עצמאי" ===
+    // סך כל ההכנסה החייבת עד 116,400 ₪ בניכוי הכנסה מבוטחת
+    const haknasaLeAmitAtzmai = Math.max(0, 
+        Math.min(shacharMevutach + shacharLoMevutach, TAKROT_2025.haknasaMezakeSe47) - shacharMevutach
+    );
+    
+    // === שלב 3: חישוב "הכנסה נוספת" (סעיף 47א(5)) ===
+    // הנמוך מבין:
+    // (1) הכנסה לא מבוטחת עד 116,400 ₪
+    const option1 = Math.min(shacharLoMevutach, TAKROT_2025.haknasaMezakeSe47);
+    
+    // (2) סך הכנסה עד 291,000 ₪ בניכוי הכנסה מבוטחת או 116,400 ₪ (הגבוה)
+    const tikra2point5 = TAKROT_2025.haknasaMezakeSe47 * 2.5;
+    const nikhui = Math.max(shacharMevutach, TAKROT_2025.haknasaMezakeSe47);
+    const option2 = Math.max(0, 
+        Math.min(shacharMevutach + shacharLoMevutach, tikra2point5) - nikhui
+    );
+    
+    const haknasaNosefet = Math.min(option1, option2);
+    
+    // === שלב 4: חישוב ניכוי לפי סטטוס עמית מוטב ===
+    
+    if (!isAmitMutav) {
+        // ========== לא עמית מוטב - סעיף 47ב(2) ==========
+        // הסכום הנמוך מבין:
+        // (א) 5% מהכנסה לא מבוטחת
+        const nikui_a = shacharLoMevutach * 0.05;
+        
+        // (ב) 5% מההכנסה החייבת עד 291,000 בניכוי הכנסה מבוטחת
+        const nikui_b = Math.max(0, 
+            Math.min(shacharMevutach + shacharLoMevutach, tikra2point5) - shacharMevutach
+        ) * 0.05;
+        
+        nikuiAmitLoMutav = Math.min(nikui_a, nikui_b);
+        
+    } else {
+        // ========== עמית מוטב - סעיף 47ב1 ==========
+        
+        // (1) 11% מההכנסה לעמית עצמאי
+        const nikuiRate1 = age >= 50 ? TAKROT_2025.nikuiRateAge50 : TAKROT_2025.nikuiRateNormal;
+        const nikui_ezmai = haknasaLeAmitAtzmai * nikuiRate1;
+        
+        // (2) 7% מההכנסה הנוספת (רק על החלק שלא קיבל ניכוי לפי פסקה 1)
+        const nikui_nosefet = haknasaNosefet * 0.07;
+        
+        nikuiAmitMutav = nikui_ezmai + nikui_nosefet;
+    }
+    
+    // === שלב 5: סיכום כולל ===
+    nikuiTotal = nikuiLoMeAvoda + (isAmitMutav ? nikuiAmitMutav : nikuiAmitLoMutav);
+    
+    // הגבלה לתקרה המקסימלית
+    nikuiTotal = Math.min(nikuiTotal, TAKROT_2025.nikuiMax);
+}
+
+// חישוב הטבת המס בפועל
+const nikuiTaxBenefit47 = nikuiTotal * 0.47;
+const nikuiTaxBenefit35 = nikuiTotal * 0.35;
+
 displayResults({
     shacharMevutach,
     shacharLoMevutach,
@@ -945,11 +1001,6 @@ displayResults({
     amitMutavYachasi,
     missingToAmitMutav,
     zikaiLeSe47,
-    zikuiFinal,
-    zikuiTaxBenefit,
-    nikuiFinal,
-    nikuiTaxBenefit47,
-    nikuiTaxBenefit35,
     bituachChayimShalem,
     zikuiBituachChayim,
     pensiaMevutachet,
@@ -965,10 +1016,15 @@ displayResults({
     shacharLoMeAvodaBefoal,
     takratshacharLoMeAvoda,
     zikuishacharLoMeAvoda,
-    takratPensiaLoMevutachetBasis
+    takratPensiaLoMevutachetBasis,
+    nikuiLoMeAvoda,
+    nikuiAmitLoMutav,
+    nikuiAmitMutav,
+    nikuiTotal,
+    nikuiTaxBenefit47,
+    nikuiTaxBenefit35
 });
-        }
-
+}
         function displayResults(data) {
             const resultsDiv = document.getElementById('results');
             
@@ -1179,43 +1235,128 @@ html += '</div>';
                 html += '</div>';
             }
             html += '</div>';
-
-            // הטבות ניכוי (אם זכאי)
-            if (data.zikaiLeSe47 && data.nikuiFinal > 0) {
-                html += '<div class="result-box highlight">';
-                html += '<div class="result-title">💰 הטבת ניכוי (סעיף 47)</div>';
-                
-                const nikuiRate = data.age >= 50 ? TAKROT_2025.nikuiRateAge50 : TAKROT_2025.nikuiRateNormal;
+       
+    
+    // הטבות ניכוי (אם זכאי)
+    if (data.zikaiLeSe47 && data.nikuiTotal > 0) {
+        html += '<div class="result-box highlight">';
+        html += '<div class="result-title">💰 הטבת ניכוי (סעיף 47)</div>';
+        
+        // ניכוי הכנסה לא מעבודה
+        if (data.nikuiLoMeAvoda > 0) {
+            html += '<div class="result-title" style="font-size: 16px; margin-top: 15px;">📋 ניכוי בגין הכנסה לא מעבודה - סעיף 47ב(1)</div>';
+            html += `<div class="result-item">
+                <span class="result-label">הכנסה לא מעבודה</span>
+                <span class="result-value">${formatNumber(data.shacharLoMeAvoda)} ₪</span>
+            </div>`;
+            html += `<div class="result-item">
+                <span class="result-label">שיעור ניכוי</span>
+                <span class="result-value">7%</span>
+            </div>`;
+            html += `<div class="result-item" style="background: #e8f5e9;">
+                <span class="result-label" style="font-weight: bold;">💚 ניכוי - הכנסה לא מעבודה</span>
+                <span class="result-value success">${formatNumber(data.nikuiLoMeAvoda)} ₪</span>
+            </div>`;
+        }
+        
+        // ניכוי עמית לא מוטב
+        if (!data.isAmitMutav && data.nikuiAmitLoMutav > 0) {
+            html += '<div class="result-title" style="font-size: 16px; margin-top: 20px;">📋 ניכוי לא עמית מוטב - סעיף 47ב(2)</div>';
+            
+            html += '<div class="warning-box" style="margin-bottom: 15px;">';
+            html += '<div class="warning-title">⚠️ שים לב</div>';
+            html += '<div class="warning-text">';
+            html += '<strong>הניכוי המלא יהיה זמין רק לאחר שתהפוך לעמית מוטב!</strong><br><br>';
+            html += `תצטרך להפקיד מינימום של <strong>${formatNumber(data.missingToAmitMutav)} ₪</strong> נוספים לקופת פנסיה.`;
+            html += '</div>';
+            html += '</div>';
+            
+            html += `<div class="result-item">
+                <span class="result-label">שכר לא מבוטח</span>
+                <span class="result-value">${formatNumber(data.shacharLoMevutach)} ₪</span>
+            </div>`;
+            html += `<div class="result-item">
+                <span class="result-label">תקרת ניכוי (5% מהכנסה לא מבוטחת)</span>
+                <span class="result-value">${formatNumber(data.shacharLoMevutach * 0.05)} ₪</span>
+            </div>`;
+            html += `<div class="result-item" style="background: #fff3e0;">
+                <span class="result-label" style="font-weight: bold;">⚠️ ניכוי פוטנציאלי - לא עמית מוטב</span>
+                <span class="result-value">${formatNumber(data.nikuiAmitLoMutav)} ₪</span>
+            </div>`;
+        }
+        
+        // ניכוי עמית מוטב
+        if (data.isAmitMutav && data.nikuiAmitMutav > 0) {
+            html += '<div class="result-title" style="font-size: 16px; margin-top: 20px;">📋 ניכוי עמית מוטב - סעיף 47ב1</div>';
+            
+            // הכנסה לעמית עצמאי
+            if (data.haknasaLeAmitAtzmai > 0) {
+                const nikuiRate = data.age >= 50 ? '16.5%' : '11%';
+                html += `<div class="result-item">
+                    <span class="result-label">הכנסה לעמית עצמאי</span>
+                    <span class="result-value">${formatNumber(data.haknasaLeAmitAtzmai)} ₪</span>
+                </div>`;
                 html += `<div class="result-item">
                     <span class="result-label">שיעור ניכוי ${data.age >= 50 ? '(גיל 50+)' : ''}</span>
-                    <span class="result-value">${(nikuiRate * 100)}%</span>
+                    <span class="result-value">${nikuiRate}</span>
                 </div>`;
-                html += `<div class="result-item">
-                    <span class="result-label">${(nikuiRate * 100)}% מהשכר הלא מבוטח</span>
-                    <span class="result-value">${formatNumber(data.shacharLoMevutach * nikuiRate)} ₪</span>
+                html += `<div class="result-item" style="background: #e3f2fd;">
+                    <span class="result-label">ניכוי מההכנסה לעמית עצמאי</span>
+                    <span class="result-value">${formatNumber(data.haknasaLeAmitAtzmai * (data.age >= 50 ? 0.165 : 0.11))} ₪</span>
                 </div>`;
-                html += `<div class="big-number">הפקדה מקסימלית: ${formatNumber(data.nikuiFinal)} ₪</div>`;
-                html += `<div class="result-item">
-                    <span class="result-label">חיסכון במס (מדרגת 47%)</span>
-                    <span class="result-value success">${formatNumber(data.nikuiTaxBenefit47)} ₪</span>
-                </div>`;
-                html += `<div class="result-item">
-                    <span class="result-label">חיסכון במס (מדרגת 35%)</span>
-                    <span class="result-value success">${formatNumber(data.nikuiTaxBenefit35)} ₪</span>
-                </div>`;
-                
-                html += '<div class="explanation">';
-                html += '<div class="explanation-title">💡 מה זה ניכוי?</div>';
-                html += '<div class="explanation-text">';
-                html += '<strong>ניכוי = הורדת ההכנסה החייבת במס.</strong><br><br>';
-                html += `אם תפקיד/י <strong>${formatNumber(data.nikuiFinal)} ₪</strong>, ההכנסה שעליה מחשבים את המס תפחת בסכום הזה.<br><br>`;
-                html += 'החיסכון במס תלוי במדרגת המס שלך:<br>';
-                html += '• אם את/ה במדרגת 47%: חוסך/ת ' + formatNumber(data.nikuiTaxBenefit47) + ' ₪<br>';
-                html += '• אם את/ה במדרגת 35%: חוסך/ת ' + formatNumber(data.nikuiTaxBenefit35) + ' ₪';
-                html += '</div>';
-                html += '</div>';
-                html += '</div>';
             }
+            
+            // הכנסה נוספת
+            if (data.haknasaNosefet > 0) {
+                html += `<div class="result-item" style="margin-top: 15px;">
+                    <span class="result-label">הכנסה נוספת</span>
+                    <span class="result-value">${formatNumber(data.haknasaNosefet)} ₪</span>
+                </div>`;
+                html += `<div class="result-item">
+                    <span class="result-label">שיעור ניכוי</span>
+                    <span class="result-value">7%</span>
+                </div>`;
+                html += `<div class="result-item" style="background: #e3f2fd;">
+                    <span class="result-label">ניכוי מההכנסה הנוספת</span>
+                    <span class="result-value">${formatNumber(data.haknasaNosefet * 0.07)} ₪</span>
+                </div>`;
+            }
+            
+            html += `<div class="result-item" style="background: #e8f5e9; margin-top: 15px;">
+                <span class="result-label" style="font-weight: bold;">💚 סה"כ ניכוי עמית מוטב</span>
+                <span class="result-value success">${formatNumber(data.nikuiAmitMutav)} ₪</span>
+            </div>`;
+        }
+        
+        // סיכום ניכוי כולל
+        html += `<div class="big-number" style="margin-top: 20px;">
+            סה"כ ניכוי מותר: ${formatNumber(data.nikuiTotal)} ₪
+        </div>`;
+        
+        // הטבת מס
+        html += '<div class="explanation">';
+        html += '<div class="explanation-title">💰 חיסכון במס בפועל</div>';
+        html += '<div class="explanation-text">';
+        html += `אם תפקיד/י <strong>${formatNumber(data.nikuiTotal)} ₪</strong>, ההכנסה החייבת במס תפחת בסכום הזה.<br><br>`;
+        html += '<strong>החיסכון במס תלוי במדרגת המס שלך:</strong><br>';
+        html += `• אם את/ה במדרגת 47%: חוסך/ת <strong>${formatNumber(data.nikuiTaxBenefit47)} ₪</strong><br>`;
+        html += `• אם את/ה במדרגת 35%: חוסך/ת <strong>${formatNumber(data.nikuiTaxBenefit35)} ₪</strong>`;
+        html += '</div>';
+        html += '</div>';
+        
+        html += '</div>';
+    } else if (data.zikaiLeSe47 && data.nikuiTotal === 0) {
+        // זכאי לניכוי אבל אין סכומים רלוונטיים
+        html += '<div class="info-box">';
+        html += '<div class="info-box-title">💡 מידע</div>';
+        html += '<div class="info-box-text">';
+        html += 'את/ה זכאי/ת לניכוי לפי סעיף 47, אך לא הוזנו הכנסות לא מבוטחות שניתן לקבל עבורן ניכוי.';
+        html += '</div>';
+        html += '</div>';
+    }
+    
+  
+
 
             // הסברים נוספים
             html += '<div class="result-box">';
